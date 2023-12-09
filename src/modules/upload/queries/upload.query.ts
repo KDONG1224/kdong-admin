@@ -1,0 +1,3 @@
+export const QUERY_UPLOAD = 'QUERY_UPLOAD';
+
+export const QUERY_POST_UPLOAD_FILE = 'QUERY_POST_UPLOAD_FILE';

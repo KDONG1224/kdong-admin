@@ -1,0 +1,3 @@
+export const QUERY_USER = 'QUERY_USER';
+
+export const QUERY_GET_ALL_USERS = 'QUERY_GET_ALL_USERS';
