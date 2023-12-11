@@ -60,3 +60,13 @@ a.ck.ck-button.ck-on {
 .ant-select-item-option-selected {
   background-color: #40404042 !important;
 }
+
+.ant-table-row-selected {
+  .ant-table-cell {
+    background-color: rgba(240, 220, 168, 0.3) !important;
+  }
+}
+
+.ant-table-selection-column {
+  display: none !important;
+}

@@ -6,3 +6,6 @@ export const LazyArticleListPage = React.lazy(
 export const LazyArticleDetailPage = React.lazy(
   () => import('./ArticleDetailPage')
 );
+export const LazyArticleCategoryPage = React.lazy(
+  () => import('./ArticleCategoryPage')
+);

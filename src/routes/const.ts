@@ -25,6 +25,8 @@ export const ROUTE_ARTICLE_DETAIL = `${ROUTE_ARTICLE}/detail`;
 export const ROUTE_ARTICLE_DETAIL_ID = `${ROUTE_ARTICLE}/detail/:id`;
 export const ROUTE_ARTICLE_DETAIL_WITH_ID = (id: string) =>
   `${ROUTE_ARTICLE_DETAIL}/${id}`;
+// 게시글 카테고리
+export const ROUTE_ARTICLE_CATEGORY = `${ROUTE_ARTICLE}/category`;
 
 // 방명록
 export const ROUTE_GUESTBOOK = '/guestbook';

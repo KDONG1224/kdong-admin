@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useEffect, useRef, useState } from 'react';
+import { useMemo, useCallback, useRef, useState } from 'react';
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from 'consts';
 
 export interface UsePaginationProps {
@@ -30,7 +30,7 @@ export const usePagination = ({
   const pagination = useMemo(() => {
     return {
       total: totalElement,
-      current: pager.page,
+      current: totalElement === 1 ? 1 : pager.page,
       pageSize: pager.pageSize,
       showSizeChanger: false,
       onChange: (page: number, pageSize: number = pager.pageSize) => {

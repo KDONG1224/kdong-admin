@@ -100,8 +100,6 @@ export const PaginationTable = <T extends {}>({
     dataSourceRef.current = dataSource;
   }, [dataSource]);
 
-  console.log('== dataSource == : ', dataSource);
-
   return (
     <StyledPaginationTable>
       {pagination.total !== null && (

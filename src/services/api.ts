@@ -3,6 +3,7 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
 import { cookieStorage, COOKIE_ACCESS_TOKEN } from './cookie';
 import { ROUTE_SIGN_IN } from 'routes/const';
+import qs from 'qs';
 
 const source = axios.CancelToken.source();
 
@@ -19,6 +20,8 @@ class AxiosInstanceCreator {
 
     this.#instance.defaults.cancelToken = source.token;
     // this.#instance.defaults.paramsSerializer = (params = {}) => {
+    //   console.log('=== params ===', params);
+
     //   if (params.filter) {
     //     params.filter = `${encodeURIComponent(JSON.stringify(params.filter))}`;
     //   }
@@ -45,6 +48,12 @@ class AxiosInstanceCreator {
         }
       }
 
+      if (!config.headers['Content-Type']) {
+        Object.assign(config.headers, {
+          'Content-Type': 'application/json'
+        });
+      }
+
       return config;
     });
 
@@ -57,7 +66,7 @@ class AxiosInstanceCreator {
         return res;
       },
       (error) => {
-        throw error.response.data;
+        throw error;
       }
     );
   }

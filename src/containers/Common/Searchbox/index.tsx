@@ -3,10 +3,29 @@ import { Descriptions, Form, Input, Select } from 'antd';
 import { useForm } from 'antd/es/form/Form';
 import { FormInstance } from 'antd/lib';
 import { BasicButton, BasicDateRangePicker } from 'components';
-import { SearchboxStateProps } from 'containers/Article';
 import { v4 as uuidv4 } from 'uuid';
+import dayjs from 'dayjs';
+import { useQuery } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
+import {
+  ResponseSubCategoryLists,
+  CategoryListsProps,
+  QUERY_GET_SUB_CATEGORY,
+  CategoryApi
+} from 'modules/category';
+import { useMemo } from 'react';
 
-interface T extends SearchboxStateProps {}
+export interface AdditionalProps {
+  [key: string]: any;
+}
+
+export interface SearchboxStateProps<T extends AdditionalProps> {
+  where__dateRange: [dayjs.Dayjs, dayjs.Dayjs];
+  where__category: string;
+  where__type: string;
+  where__title: string;
+  additionalProps: T;
+}
 
 interface customFormItems {
   title: string;
@@ -17,7 +36,7 @@ interface customFormItems {
 
 interface SearchboxProps {
   customFormItems?: customFormItems[];
-  onSearch: (values: T) => void;
+  onSearch: <T extends AdditionalProps>(values: T) => void;
 }
 
 export const Searchbox: React.FC<SearchboxProps> = ({
@@ -26,7 +45,32 @@ export const Searchbox: React.FC<SearchboxProps> = ({
 }) => {
   const [form] = useForm();
 
-  const onChangeDateRange = (values: any, dateString: [string, string]) => {
+  const categoryApi = useMemo(() => {
+    return new CategoryApi();
+  }, []);
+
+  const { data: categories } = useQuery<
+    ResponseSubCategoryLists,
+    AxiosError,
+    CategoryListsProps[]
+  >(
+    [QUERY_GET_SUB_CATEGORY],
+    async () => {
+      return await categoryApi.getAllSubCategories();
+    },
+    {
+      select: (data) => {
+        return data.result.subCategories as CategoryListsProps[];
+      },
+      refetchOnWindowFocus: false,
+      refetchOnMount: false
+    }
+  );
+
+  const onChangeDateRange = (
+    values: [dayjs.Dayjs, dayjs.Dayjs],
+    dateString: [string, string]
+  ) => {
     console.log(values, dateString);
   };
 
@@ -34,9 +78,7 @@ export const Searchbox: React.FC<SearchboxProps> = ({
     form.resetFields();
   };
 
-  const onFinish = (values: T) => {
-    console.log(values);
-
+  const onFinish = <T extends AdditionalProps>(values: T) => {
     onSearch(values);
   };
 
@@ -46,10 +88,13 @@ export const Searchbox: React.FC<SearchboxProps> = ({
         <Descriptions>
           <Descriptions.Item label="검색기간" span={3}>
             <div className="flex-box">
-              <Form.Item name="search-date-range">
+              <Form.Item name="where__dateRange">
                 <BasicDateRangePicker
                   onChange={(values, dateString) =>
-                    onChangeDateRange(values, dateString)
+                    onChangeDateRange(
+                      values as [dayjs.Dayjs, dayjs.Dayjs],
+                      dateString
+                    )
                   }
                 />
               </Form.Item>
@@ -61,18 +106,29 @@ export const Searchbox: React.FC<SearchboxProps> = ({
 
           <Descriptions.Item label="검색타입" span={3}>
             <div className="flex-box">
-              <Form.Item name="search-category">
-                <Select placeholder="카테고리를 선택해주세요." options={[]} />
+              <Form.Item name="where__category">
+                <Select
+                  placeholder="카테고리를 선택해주세요."
+                  options={
+                    categories
+                      ? categories.map((category) => ({
+                          ...category,
+                          label: category.categoryName,
+                          value: category.categoryName
+                        }))
+                      : []
+                  }
+                />
               </Form.Item>
 
-              <Form.Item name="search-type">
+              <Form.Item name="where__type">
                 <Input />
               </Form.Item>
             </div>
           </Descriptions.Item>
 
           <Descriptions.Item label="검색어" span={3}>
-            <Form.Item name="search-keyword">
+            <Form.Item name="where__title">
               <Input />
             </Form.Item>
           </Descriptions.Item>

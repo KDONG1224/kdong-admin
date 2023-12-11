@@ -2,7 +2,7 @@ import AxiosInstanceCreator from 'services/api';
 import { UserAccount } from '../models/auth.model';
 
 export const authInstance = new AxiosInstanceCreator({
-  baseURL: `http://localhost:24189/auth`
+  baseURL: `${process.env.REACT_APP_API_URL}/auth`
 }).create();
 
 export const authApi = {

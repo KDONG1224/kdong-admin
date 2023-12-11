@@ -1,11 +1,12 @@
 // base
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useHistory } from 'react-router';
 
 // styles
 import { StyledArticleList } from './style';
 
 // containers
-import { Searchbox } from 'containers';
+import { AdditionalProps, Searchbox, SearchboxStateProps } from 'containers';
 
 // components
 import { BasicButton, LazyImage, PaginationTable } from 'components';
@@ -13,29 +14,35 @@ import { BasicButton, LazyImage, PaginationTable } from 'components';
 // hooks
 import { usePagination, useTargetScroll } from 'hooks';
 
-// libraries
-import dayjs from 'dayjs';
-import { Switch } from 'antd';
+// modules
+import {
+  ArticleApi,
+  ArticleListsProps,
+  ArticleThumbnaiProps,
+  QUERY_EXPOSE_ARTICLE,
+  QUERY_GET_ALL_ARTICLES,
+  ResponseArticleLists
+} from 'modules/article';
+
+// routs
 import {
   ROUTE_ARTICLE_CREATE,
   ROUTE_ARTICLE_DETAIL_WITH_ID
 } from 'routes/const';
-import { useHistory } from 'react-router';
-import { useQuery } from '@tanstack/react-query';
-import { ArticleApi, QUERY_GET_ALL_ARTICLES } from 'modules/article';
 
-export interface SearchboxStateProps {
-  'search-date-range': [dayjs.Dayjs, dayjs.Dayjs];
-  'search-category': string;
-  'search-type': string;
-  'search-keyword': string;
-}
+// libraries
+import dayjs from 'dayjs';
+import { Switch } from 'antd';
+import { AxiosError } from 'axios';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export const ArticleList = () => {
-  const [isArticles, setIsArticles] = useState<any[]>([]);
+  const [isArticles, setIsArticles] = useState<ArticleListsProps[]>([]);
   const [totalElement, setTotalElement] = useState(0);
+  const [isSearch, setIsSearch] = useState<any>(undefined);
 
   const history = useHistory();
+  const queryClient = useQueryClient();
 
   const { scrollY } = useTargetScroll({ y: 630, target: '.list-wrapper' });
 
@@ -57,33 +64,30 @@ export const ArticleList = () => {
         key: 'thumbnails',
         dataIndex: 'thumbnails',
         title: '썸네일',
-        render: (texts: any) => {
-          console.log('== texts == : ', texts);
-
-          return texts && texts.length > 0 ? (
+        render: (texts: ArticleThumbnaiProps[]) =>
+          texts && texts.length > 0 ? (
             <LazyImage src={texts[0].location} width="100%" height={60} />
           ) : (
             '없음'
-          );
-        }
+          )
       },
       {
         key: 'createdAt',
         dataIndex: 'createdAt',
         title: '생성일',
-        render: (text: any) => dayjs(text).format('YYYY-MM-DD')
+        render: (text: string) => dayjs(text).format('YYYY-MM-DD')
       },
       {
         key: 'updatedAt',
         dataIndex: 'updatedAt',
         title: '수정일',
-        render: (text: any) => dayjs(text).format('YYYY-MM-DD')
+        render: (text: string) => dayjs(text).format('YYYY-MM-DD')
       },
       {
         key: 'expose',
         dataIndex: 'expose',
         title: '노출여부',
-        render: (text: any, record: any) => (
+        render: (text: boolean, record: ArticleListsProps) => (
           <Switch
             checked={text}
             onChange={() => onChangeArticleExpose(record)}
@@ -94,7 +98,7 @@ export const ArticleList = () => {
         key: 'edit',
         dataIndex: 'edit',
         title: '수정',
-        render: (text: any, record: any) => (
+        render: (text: any, record) => (
           <BasicButton
             btnText="수정"
             onClick={() => onChangeArticleEdit(record)}
@@ -102,32 +106,63 @@ export const ArticleList = () => {
         )
       }
     ],
-    []
+    [isArticles]
   );
 
-  const { data: articles, isLoading } = useQuery<any, any, any, any>(
-    [QUERY_GET_ALL_ARTICLES, history],
-    async () => {
+  const dataSource = useMemo(() => {
+    if (!isArticles) return [];
+
+    return isArticles;
+  }, [isArticles]);
+
+  const { data: articles, isFetching } = useQuery<
+    ResponseArticleLists,
+    AxiosError,
+    AdditionalProps
+  >(
+    [QUERY_GET_ALL_ARTICLES, history, isSearch],
+    async ({ queryKey }) => {
+      const [_, __, isSearch] = queryKey;
+
+      if (isSearch) {
+        const { where__dateRange, ...rest } =
+          isSearch as SearchboxStateProps<any>;
+
+        const query = {
+          ...rest,
+          where__fromDate: dayjs(where__dateRange[0]).format('YYYY-MM-DD'),
+          where__toDate: dayjs(where__dateRange[1]).format('YYYY-MM-DD')
+        };
+
+        return await articleApi.getAllArticles(query);
+      }
+
       return await articleApi.getAllArticles();
     },
     {
       select: (data) => {
         return data.result;
-      },
-      onSuccess: (data) => {
-        const { articles, total } = data;
-
-        setIsArticles(articles);
-        setTotalElement(total);
       }
     }
   );
 
-  const onChangeArticleExpose = (record: any) => {
-    console.log(record);
+  const { mutateAsync: changeExpose } = useMutation(
+    [QUERY_EXPOSE_ARTICLE, articles],
+    async (id: string) => {
+      return await articleApi.updateArticleExposeById(id);
+    },
+    {
+      onSettled: () => {
+        return queryClient.invalidateQueries([QUERY_GET_ALL_ARTICLES]);
+      }
+    }
+  );
+
+  const onChangeArticleExpose = (record: ArticleListsProps) => {
+    changeExpose(record.id);
   };
 
-  const onChangeArticleEdit = (record: any) => {
+  const onChangeArticleEdit = (record: ArticleListsProps) => {
     history.push(ROUTE_ARTICLE_DETAIL_WITH_ID(record.id), {
       articleId: record.id
     });
@@ -139,9 +174,16 @@ export const ArticleList = () => {
     });
   };
 
-  const onSearch = (values: any) => {
-    console.log(values);
+  const onSearch = <T extends AdditionalProps>(values: T) => {
+    setIsSearch(values as T);
   };
+
+  useEffect(() => {
+    if (!articles) return;
+
+    setIsArticles(articles.articles);
+    setTotalElement(articles.total);
+  }, [articles]);
 
   return (
     <StyledArticleList>
@@ -153,10 +195,10 @@ export const ArticleList = () => {
         <div className="list-wrapper-table">
           <PaginationTable
             columns={columns}
-            dataSource={isArticles}
+            dataSource={dataSource}
             pagination={pagination}
             onChangePageSize={onChangePageSize}
-            isLoading={isLoading}
+            isLoading={isFetching}
             scroll={{ y: scrollY }}
             customLeft={
               <BasicButton btnText="신규등록" onClick={onChangeNewArticle} />

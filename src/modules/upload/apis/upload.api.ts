@@ -1,7 +1,7 @@
 import AxiosInstanceCreator from 'services/api';
 
 export const uploadInstance = new AxiosInstanceCreator({
-  baseURL: `http://localhost:24189/common`
+  baseURL: `${process.env.REACT_APP_API_URL}/common`
 }).create();
 
 export const uploadApi = {

@@ -13,6 +13,7 @@ import { MenuItem, getItem } from 'utils';
 // routes
 import {
   ROUTE_ARTICLE,
+  ROUTE_ARTICLE_CATEGORY,
   ROUTE_ARTICLE_LIST,
   ROUTE_EVENT,
   ROUTE_GUESTBOOK,
@@ -60,7 +61,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       getItem('유저목록', ROUTE_USER_MANAGEMENT)
     ]),
     getItem('게시글', ROUTE_ARTICLE, <ReadOutlined />, [
-      getItem('게시글 목록', ROUTE_ARTICLE_LIST)
+      getItem('게시글 목록', ROUTE_ARTICLE_LIST),
+      getItem('게시글 카테고리', ROUTE_ARTICLE_CATEGORY)
     ]),
     getItem('방명록', ROUTE_GUESTBOOK, <ContactsOutlined />),
     getItem('이벤트', ROUTE_EVENT, <BuildOutlined />),

@@ -40,6 +40,10 @@ export const StyledSearchbox = styled.div`
       gap: 0.8rem;
     }
 
+    .ant-select {
+      width: 18rem;
+    }
+
     &-bottom {
       display: flex;
       flex-direction: row-reverse;

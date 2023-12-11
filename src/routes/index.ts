@@ -29,6 +29,10 @@ export const routes: Routes = {
       component: pages.LazyArticleDetailPage
     },
     {
+      path: paths.ROUTE_ARTICLE_CATEGORY,
+      component: pages.LazyArticleCategoryPage
+    },
+    {
       path: paths.ROUTE_USER_MANAGEMENT,
       component: pages.LazyUserMangementPage
     }

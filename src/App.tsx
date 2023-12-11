@@ -16,24 +16,29 @@ import { ROUTE_SIGN_IN, ROUTE_SIGN_UP } from 'routes/const';
 
 // libraries
 import styled from 'styled-components';
+import { useRecoilValue } from 'recoil';
+import { loadingState } from 'modules/ui';
 
 const StyledApp = styled.div`
   height: 100vh;
 `;
 
 const App = () => {
+  const loading = useRecoilValue(loadingState);
+
   const checkUser = (user: any) => {
-    // const arr = ['partner', 'anno', 'compliance'];
-    // const checkArr = arr.every(item => user?.accountType === item);
+    const arr = ['ADMIN', 'CLIENT', 'USER'];
+    const checkArr = arr.every((item) => user?.accountType === item);
 
-    // return !checkArr;
-
-    return true;
+    return !checkArr;
   };
+
+  console.log('== loading == : ', loading);
 
   return (
     <Router>
       <StyledApp className="App">
+        {loading && <PageLoader />}
         <Suspense fallback={<PageLoader />}>
           <Switch>
             <Route path={ROUTE_SIGN_IN} component={LazySignInPage} />
