@@ -59,6 +59,8 @@ class AxiosInstanceCreator {
 
     this.#instance.interceptors.response.use(
       (res) => {
+        const token = cookieStorage.getCookie(COOKIE_ACCESS_TOKEN);
+
         // if (res.data.code) {
         //   throw new Error(res.data.message).message;
         // }

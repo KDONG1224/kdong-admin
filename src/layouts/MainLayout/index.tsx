@@ -1,11 +1,19 @@
 // base
 import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router';
 
 // style
 import { StyledMainLayout } from './style';
 
 // components
 import { BasicAvatar } from 'components';
+
+// modules
+import { userLoginState } from 'modules/auth';
+import { collapsedState } from 'modules/ui';
+
+// services
+import { cookieStorage } from 'services/cookie';
 
 // utils
 import { MenuItem, getItem } from 'utils';
@@ -20,6 +28,7 @@ import {
   ROUTE_PROFILE,
   ROUTE_ROOT,
   ROUTE_SETTING,
+  ROUTE_SIGN_IN,
   ROUTE_USER,
   ROUTE_USER_MANAGEMENT
 } from 'routes/const';
@@ -35,21 +44,19 @@ import {
   TeamOutlined,
   UserOutlined
 } from '@ant-design/icons';
-import { useHistory } from 'react-router';
 import { MenuInfo } from 'rc-menu/lib/interface';
-import { userLoginState } from 'modules/auth';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-  const [collapsed, setCollapsed] = useState(false);
   const [openKeys, setOpenKeys] = useState<string[]>([]);
   const [activeKey, setActiveKey] = useState<string[]>([]);
 
-  const user = useRecoilValue(userLoginState);
+  const [collapsed, setCollapsed] = useRecoilState(collapsedState);
+  const { isLogin, userInfo } = useRecoilValue(userLoginState);
 
   const history = useHistory();
   const pathname = history.location.pathname;
@@ -76,8 +83,21 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     history.push(key.toString());
   };
 
+  const onChangeCollasped = (value: boolean) => {
+    setCollapsed(value);
+  };
+
   const onChangeOpenKeys = (keys: string[]) => {
     setOpenKeys(keys);
+  };
+
+  const onSignIn = () => {
+    history.push(ROUTE_SIGN_IN);
+  };
+
+  const onSignOut = () => {
+    cookieStorage.clearAllCookies();
+    history.push(ROUTE_SIGN_IN);
   };
 
   useEffect(() => {
@@ -93,7 +113,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <Layout.Sider
         collapsible
         collapsed={collapsed}
-        onCollapse={(value) => setCollapsed(value)}
+        onCollapse={onChangeCollasped}
       >
         <Menu
           theme="dark"
@@ -104,6 +124,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           openKeys={openKeys}
           selectedKeys={activeKey}
           defaultSelectedKeys={[ROUTE_ROOT]}
+          defaultOpenKeys={openKeys}
         />
       </Layout.Sider>
 
@@ -113,15 +134,26 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <div className="header-wrapper">
             <div>KDONG's Portfolio</div>
             <div className="header-wrapper-right">
-              {user && user.userInfo && (
+              {isLogin && userInfo && (
                 <BasicAvatar
-                  text={user.userInfo.username}
+                  text={userInfo.username.split('')[0]}
                   gap={10}
-                  size={45}
+                  size={40}
                   style={{ backgroundColor: '#fde3cf', color: '#f56a00' }}
                 />
               )}
-              <Button type="primary">로그인</Button>
+              <Button
+                type="primary"
+                onClick={() => {
+                  if (isLogin && userInfo) {
+                    onSignOut();
+                  } else {
+                    onSignIn();
+                  }
+                }}
+              >
+                {isLogin && userInfo ? '로그아웃' : '로그인'}
+              </Button>
             </div>
           </div>
         </Layout.Header>

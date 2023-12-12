@@ -4,6 +4,9 @@ import { RouteProps, Route } from 'react-router';
 
 // modules
 import { ResponseUserInfo } from 'modules';
+import { useRecoilValue } from 'recoil';
+import { userLoginState } from 'modules/auth';
+import { ROUTE_SIGN_IN } from './const';
 
 interface PrivateRouteProps extends RouteProps {
   path: string | string[];
@@ -14,19 +17,17 @@ interface PrivateRouteProps extends RouteProps {
 export const PrivateRoute = (props: PrivateRouteProps) => {
   const { component, fallback, isPermission, ...rest } = props;
 
-  // const { isLogin, user } = useUser();
-
-  const isLogin = true;
+  const { isLogin, userInfo: user } = useRecoilValue(userLoginState);
 
   useEffect(() => {
-    // if (isLogin === false) {
-    //   window.location.href = ROUTE_SIGN_IN;
-    // }
+    if (isLogin === false) {
+      window.location.href = ROUTE_SIGN_IN;
+    }
   }, [isLogin]);
 
-  // if (isLogin === undefined || user === undefined) {
-  //   return <div />;
-  // }
+  if (isLogin === undefined || user === undefined) {
+    return <div />;
+  }
 
   return (
     <Route
