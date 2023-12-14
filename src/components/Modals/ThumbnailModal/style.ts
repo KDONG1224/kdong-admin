@@ -1,7 +1,7 @@
 import { Modal } from 'antd';
 import styled from 'styled-components';
 
-export const StyledThumbnailModal = styled(Modal)`
+export const StyledThumbnailModal = styled(Modal)<{ isEmpty: boolean }>`
   .thumbnail-wrapper {
     &-body {
       display: flex;

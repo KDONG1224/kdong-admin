@@ -43,6 +43,10 @@ export const routes: Routes = {
     {
       path: paths.ROUTE_PROFILE_BANNER,
       component: pages.LazyProfileBannerPage
+    },
+    {
+      path: paths.ROUTE_PROFILE_FAQ,
+      component: pages.LazyProfileFaqPage
     }
   ]
 };

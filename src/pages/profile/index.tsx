@@ -6,3 +6,4 @@ export const LazyProfileBannerPage = React.lazy(
 export const LazyProfileKdongPage = React.lazy(
   () => import('./ProfileKdongPage')
 );
+export const LazyProfileFaqPage = React.lazy(() => import('./ProfileFaqPage'));

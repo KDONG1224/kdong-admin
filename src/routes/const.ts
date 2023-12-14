@@ -11,6 +11,7 @@ export const ROUTE_SIGN_UP = `/sign-up`;
 export const ROUTE_PROFILE = '/profile';
 export const ROUTE_PROFILE_KDONG = `${ROUTE_PROFILE}/kdong`;
 export const ROUTE_PROFILE_BANNER = `${ROUTE_PROFILE}/banner`;
+export const ROUTE_PROFILE_FAQ = `${ROUTE_PROFILE}/faq`;
 
 // 유저관리
 export const ROUTE_USER = '/user';

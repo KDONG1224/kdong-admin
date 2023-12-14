@@ -44,3 +44,29 @@ export interface RequestProfileBannerUpdate {
   playSpeed: string & number & Blob;
   autoPlay: boolean & string & Blob;
 }
+
+/**
+ * FAQ
+ */
+export interface FaqListsProps {
+  id: string;
+  question: string;
+  answer: string;
+  faqType: string;
+  sequence: number;
+  expose: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RequestProfileFaqFormProps {
+  question: string;
+  answer: string;
+  faqType: string;
+}
+
+export interface ResponseProfileFaqProps extends BaseResponseProps {
+  result: {
+    faqLists: FaqListsProps[];
+  };
+}

@@ -27,6 +27,7 @@ import {
   ROUTE_GUESTBOOK,
   ROUTE_PROFILE,
   ROUTE_PROFILE_BANNER,
+  ROUTE_PROFILE_FAQ,
   ROUTE_PROFILE_KDONG,
   ROUTE_ROOT,
   ROUTE_SETTING,
@@ -67,7 +68,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     getItem('대시보드', ROUTE_ROOT, <AppstoreOutlined />),
     getItem('프로필', ROUTE_PROFILE, <UserOutlined />, [
       getItem('KDONG', ROUTE_PROFILE_KDONG),
-      getItem('메인 배너', ROUTE_PROFILE_BANNER)
+      getItem('메인 배너', ROUTE_PROFILE_BANNER),
+      getItem('FAQ', ROUTE_PROFILE_FAQ)
     ]),
     getItem('유저관리', ROUTE_USER, <TeamOutlined />, [
       getItem('유저목록', ROUTE_USER_MANAGEMENT)

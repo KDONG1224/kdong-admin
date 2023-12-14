@@ -75,7 +75,7 @@ export const ProfileBanner = () => {
   >(
     [QUERY_GET_PROFILE],
     async () => {
-      return await profileApi.getProfile();
+      return await profileApi.getProfileBanners();
     },
     {
       select: (res) => {

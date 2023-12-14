@@ -77,8 +77,6 @@ export const DragSortTable = <T extends {}>({
   ...props
 }: DragSortTableProps<T>) => {
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
-    console.log('== active, over == : ', active, over);
-
     if (active.id !== over?.id) {
       setSequence((prev: any) => {
         const activeIndex = prev.findIndex(
@@ -91,8 +89,6 @@ export const DragSortTable = <T extends {}>({
     }
   };
 
-  console.log('= dataSource = : ', dataSource);
-
   return (
     <DndContext modifiers={[restrictToVerticalAxis]} onDragEnd={handleDragEnd}>
       <SortableContext
@@ -102,6 +98,7 @@ export const DragSortTable = <T extends {}>({
         strategy={verticalListSortingStrategy}
       >
         <StyledDragSortTable
+          isEmpty={dataSource.length < 1}
           components={{
             body: {
               row: Row
