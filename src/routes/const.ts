@@ -9,6 +9,8 @@ export const ROUTE_SIGN_UP = `/sign-up`;
 
 // 프로필
 export const ROUTE_PROFILE = '/profile';
+export const ROUTE_PROFILE_KDONG = `${ROUTE_PROFILE}/kdong`;
+export const ROUTE_PROFILE_BANNER = `${ROUTE_PROFILE}/banner`;
 
 // 유저관리
 export const ROUTE_USER = '/user';

@@ -35,6 +35,14 @@ export const routes: Routes = {
     {
       path: paths.ROUTE_USER_MANAGEMENT,
       component: pages.LazyUserMangementPage
+    },
+    {
+      path: paths.ROUTE_PROFILE_KDONG,
+      component: pages.LazyProfileKdongPage
+    },
+    {
+      path: paths.ROUTE_PROFILE_BANNER,
+      component: pages.LazyProfileBannerPage
     }
   ]
 };
