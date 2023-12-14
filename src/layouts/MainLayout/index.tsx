@@ -48,7 +48,7 @@ import {
   UserOutlined
 } from '@ant-design/icons';
 import { MenuInfo } from 'rc-menu/lib/interface';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -60,6 +60,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   const [collapsed, setCollapsed] = useRecoilState(collapsedState);
   const { isLogin, userInfo } = useRecoilValue(userLoginState);
+
+  const setLogout = useSetRecoilState(userLoginState);
 
   const history = useHistory();
   const pathname = history.location.pathname;
@@ -104,6 +106,10 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   const onSignOut = () => {
     cookieStorage.clearAllCookies();
+    setLogout({
+      userInfo: undefined,
+      isLogin: false
+    });
     history.push(ROUTE_SIGN_IN);
   };
 

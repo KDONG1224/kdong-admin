@@ -69,7 +69,9 @@ export const ProfileFaq = () => {
   const { mutateAsync: changeExpose } = useMutation(
     [QUERY_PROFILE_FAQ_EXPOSE],
     async () => {
-      return await faqApi.updateExposeProfileFaq(editFaq?.id as string);
+      return await faqApi.updateExposeProfileFaq(editFaq?.id as string, {
+        expose: !editFaq?.expose as boolean
+      });
     },
     {
       onSuccess: () => {

@@ -41,7 +41,9 @@ export class ProfileApi {
     return await this.Axios.patch(`/faqs/${id}`, data).then((res) => res.data);
   }
 
-  async updateExposeProfileFaq(id: string) {
-    return await this.Axios.patch(`/faqs/expose/${id}`).then((res) => res.data);
+  async updateExposeProfileFaq(id: string, data: { expose: boolean }) {
+    return await this.Axios.patch(`/faqs/expose/${id}`, data).then(
+      (res) => res.data
+    );
   }
 }
