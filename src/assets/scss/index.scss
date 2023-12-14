@@ -35,7 +35,9 @@ svg {
 }
 
 .ck-balloon-panel {
-  display: none !important;
+  &.ck-powered-by-balloon {
+    display: none !important;
+  }
 }
 
 .ck.ck-button.ck-on,

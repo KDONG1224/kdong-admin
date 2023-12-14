@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 interface StyledBasicTextEditorProps {
-  scrollY: number;
+  scrolly: number;
 }
 
 export const StyledBasicTextEditor = styled.div<StyledBasicTextEditorProps>`
@@ -22,10 +22,10 @@ export const StyledBasicTextEditor = styled.div<StyledBasicTextEditorProps>`
   }
 
   .ck-editor__main {
-    height: ${({ scrollY }) => `${scrollY}px`};
+    height: ${({ scrolly }) => `${scrolly}px`};
 
     .ck-content {
-      height: ${({ scrollY }) => `${scrollY}px`};
+      height: ${({ scrolly }) => `${scrolly}px`};
       border: none !important;
       border-radius: 0 !important;
       border-top-left-radius: 0;

@@ -57,7 +57,12 @@ export const ArticleList = () => {
   const columns = useMemo(
     () => [
       { key: 'title', dataIndex: 'title', title: '제목' },
-      { key: 'category', dataIndex: 'category', title: '카테고리' },
+      {
+        key: 'category',
+        dataIndex: 'category',
+        title: '카테고리',
+        render: (text: any) => (text ? text.categoryName : '')
+      },
       { key: 'readCount', dataIndex: 'readCount', title: '조회수' },
       { key: 'likeCount', dataIndex: 'likeCount', title: '좋아요' },
       {

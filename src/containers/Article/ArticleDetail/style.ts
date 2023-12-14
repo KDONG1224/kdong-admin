@@ -14,9 +14,13 @@ export const StyledArticleDetail = styled.div`
 
       &-category {
         width: 140px;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
 
         .ant-select {
-          width: 140px;
+          min-width: 20rem;
+          width: 100%;
         }
       }
 

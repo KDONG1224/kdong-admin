@@ -75,7 +75,7 @@ export const BasicTextEditor: React.FC<BasicTextEditorProps> = ({
   };
 
   return (
-    <StyledBasicTextEditor scrollY={scrollY}>
+    <StyledBasicTextEditor scrolly={scrollY}>
       <CKEditor
         editor={Editor}
         data={editorData}
@@ -114,15 +114,47 @@ export const BasicTextEditor: React.FC<BasicTextEditorProps> = ({
             ]
           },
           language: 'ko',
+          // image: {
+          //   toolbar: [
+          //     'imageTextAlternative',
+          //     'toggleImageCaption',
+          //     'imageStyle:inline',
+          //     'imageStyle:block',
+          //     'imageStyle:side'
+          //   ]
+          // },
           image: {
+            // styles: ['alignCenter', 'alignLeft', 'alignRight'],
+            resizeOptions: [
+              {
+                name: 'resizeImage:original',
+                label: 'Default image width',
+                value: null
+              },
+              {
+                name: 'resizeImage:50',
+                label: '50% page width',
+                value: '50'
+              },
+              {
+                name: 'resizeImage:75',
+                label: '75% page width',
+                value: '75'
+              }
+            ],
             toolbar: [
               'imageTextAlternative',
               'toggleImageCaption',
+              '|',
               'imageStyle:inline',
-              'imageStyle:block',
-              'imageStyle:side'
+              'imageStyle:wrapText',
+              'imageStyle:breakText',
+              'imageStyle:side',
+              '|',
+              'resizeImage'
             ]
           },
+
           table: {
             contentToolbar: [
               'tableColumn',

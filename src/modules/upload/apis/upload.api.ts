@@ -12,5 +12,14 @@ export const uploadApi = {
           'Content-Type': 'multipart/form-data'
         }
       })
-      .then((res) => res.data)
+      .then((res) => res.data),
+  getS3Object: async (fileUrl: string, fileName: string, mimetype: string) => {
+    return await fetch(fileUrl)
+      .then((res) => res.blob())
+      .then((blob) => {
+        const file = new File([blob], fileName, { type: mimetype });
+
+        return file;
+      });
+  }
 };

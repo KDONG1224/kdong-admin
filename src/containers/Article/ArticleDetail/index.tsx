@@ -14,7 +14,7 @@ import {
 } from 'components';
 
 // libraries
-import { Input, Select } from 'antd';
+import { ColorPicker, Input, Select } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArticleApi,
@@ -23,7 +23,15 @@ import {
 } from 'modules/article';
 import { UploadFile } from 'antd/lib';
 import { ArticleDetailStateProps } from 'modules/article/models/article.model';
-
+import {
+  CategoryApi,
+  CategoryListsProps,
+  QUERY_GET_SUB_CATEGORY,
+  ResponseSubCategoryLists
+} from 'modules/category';
+import { AxiosError } from 'axios';
+import { uploadApi } from 'modules/upload';
+import { Color } from 'antd/es/color-picker';
 /**
  * 1) 카테고리 선택 만들기 (front + backend)
  * 2) 썸네일 추가 + 보기 만들기 (modal) === 완료
@@ -36,11 +44,14 @@ export const ArticleDetail = () => {
   const [title, setTitle] = useState<string>('');
   const [modalTitle, setModalTitle] = useState<string>('');
   const [editorData, setEditorData] = useState('');
+  const [category, setCategory] = useState<CategoryListsProps | null>(null);
   const [tags, setTags] = useState<string[]>(['KDONG']);
   const [thumbnail, setThumbnail] = useState<UploadFile[]>([]);
   const [isThumbModal, setIsThumbModal] = useState(false);
   const [thumbnailUrl, setThumbnailUrl] = useState<string>('');
   const [thumnaillist, setThumnaillist] = useState<any[]>([]);
+  const [mainColor, setMainColor] = useState<string>('#000000');
+  const [subColor, setSubColor] = useState<string>('#f43f00');
 
   const queryClient = useQueryClient();
   const history = useHistory();
@@ -50,7 +61,11 @@ export const ArticleDetail = () => {
     return new ArticleApi();
   }, []);
 
-  const { data, isLoading } = useQuery(
+  const categoryApi = useMemo(() => {
+    return new CategoryApi();
+  }, []);
+
+  const { data: articleDetail, isFetching } = useQuery(
     [QUERY_GET_ARTICLE_BY_ID, isEdit],
     async () => {
       if (!locationState || !isEdit) return null;
@@ -63,21 +78,55 @@ export const ArticleDetail = () => {
 
         return data.result;
       },
-      onSuccess: (data) => {
+      onSuccess: async (data) => {
         if (!data) return;
 
-        const { title, content, tags, thumbnails } = data;
+        const { title, content, tags, thumbnails, mainColor, subColor } = data;
 
         const tagsArr =
           tags && tags.length > 0 ? tags.map((tag: any) => tag.tag) : [];
 
+        const res = await Promise.all(
+          thumbnails.map(async (item: any, idx: number) => {
+            const file = await uploadApi.getS3Object(
+              item.location,
+              item.originalname,
+              item.mimetype
+            );
+
+            return {
+              file,
+              ...item
+            };
+          })
+        );
+
         setTitle(title);
         setEditorData(content);
         setTags(tagsArr);
-        setThumnaillist(thumbnails);
+        setThumnaillist(res);
+        setMainColor(mainColor);
+        setSubColor(subColor);
       },
       refetchOnWindowFocus: false,
       retry: false
+    }
+  );
+
+  const { data: categories } = useQuery<
+    ResponseSubCategoryLists,
+    AxiosError,
+    CategoryListsProps[]
+  >(
+    [QUERY_GET_SUB_CATEGORY],
+    async () => {
+      return await categoryApi.getAllSubCategories();
+    },
+    {
+      select: (data) => {
+        return data.result.subCategories as CategoryListsProps[];
+      },
+      refetchOnWindowFocus: false
     }
   );
 
@@ -85,6 +134,8 @@ export const ArticleDetail = () => {
     async (data: any) => {
       if (isEdit) {
         if (!locationState) return null;
+
+        console.log('== edit == :  ', data);
 
         return await articleApi.updateArticleById(
           locationState.articleId as string,
@@ -127,6 +178,10 @@ export const ArticleDetail = () => {
     setTitle(e.target.value);
   };
 
+  const onChangeCategory = (option: CategoryListsProps) => {
+    setCategory(option);
+  };
+
   const onChangeEditorData = (content: string) => {
     setEditorData(content);
   };
@@ -135,11 +190,33 @@ export const ArticleDetail = () => {
     setTags(values);
   };
 
+  const onChangeMainColor = (color: any) => {
+    setMainColor(color);
+  };
+
+  const onChangeSubColor = (color: any) => {
+    setSubColor(color);
+  };
+
   const onVisibleThumbModal = () => {
     setIsThumbModal((prev) => !prev);
   };
 
   const onChangeUploadFile = (file: UploadFile[], originFile: any[]) => {
+    if (isEdit) {
+      console.log('== onChangeUploadFile : file == : ', file);
+      console.log('== onChangeUploadFile : originFile == : ', originFile);
+      console.log('== onChangeUploadFile : thumnaillist == : ', thumnaillist);
+
+      // setThumbnail((prev: any) =>
+      //   [...prev, , ...file].map((item, idx) => ({
+      //     ...item,
+      //     // sequence: idx + 1
+      //   }))
+      // );
+      // setThumnaillist((prev: any) => [...prev, ...originFile]);
+      return;
+    }
     setThumbnail(file);
     setThumnaillist(originFile);
   };
@@ -158,19 +235,39 @@ export const ArticleDetail = () => {
     try {
       const formData = new FormData();
 
+      console.log('== thumbnail == : ', thumbnail);
+      console.log('== thumnaillist == : ', thumnaillist);
+
       thumbnail.forEach((file: any) => {
         formData.append('thumbnails', file.originFileObj);
       });
 
+      if (category) {
+        formData.append('category', category.id);
+      }
+
       formData.append('title', title);
       formData.append('content', editorData);
       formData.append('tags', tags.join(','));
+      formData.append('mainColor', mainColor);
+      formData.append('subColor', subColor);
 
       await mutateAsync(formData);
     } catch (error) {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    if (!categories || !articleDetail) return;
+
+    const category = categories.find(
+      (r) => r && r.id === articleDetail.category.id
+    );
+
+    setCategory(category ? category : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categories]);
 
   useEffect(() => {
     if (locationState && locationState.articleId) {
@@ -204,20 +301,58 @@ export const ArticleDetail = () => {
             <div className="detail-wrapper-default-category">
               <Select
                 placeholder="카테고리를 선택해주세요."
-                options={[
-                  {
-                    label: '카테고리 1번',
-                    value: '1'
-                  },
-                  {
-                    label: '카테고리 2번',
-                    value: '2'
-                  },
-                  {
-                    label: '카테고리 3번',
-                    value: '3'
-                  }
-                ]}
+                value={category?.categoryName}
+                options={
+                  categories
+                    ? categories.map((category) => ({
+                        ...category,
+                        label: category.categoryName,
+                        value: category.categoryName
+                      }))
+                    : []
+                }
+                onChange={(_, option) =>
+                  onChangeCategory(option as CategoryListsProps)
+                }
+              />
+              <ColorPicker
+                value={mainColor}
+                panelRender={(panel) => (
+                  <div className="custom-panel">
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: 'rgba(0, 0, 0, 0.88)',
+                        lineHeight: '20px',
+                        marginBottom: 8
+                      }}
+                    >
+                      Main Color Picker
+                    </div>
+                    {panel}
+                  </div>
+                )}
+                onChange={(value: Color, hex: string) => onChangeMainColor(hex)}
+              />
+
+              <ColorPicker
+                value={subColor}
+                panelRender={(panel) => (
+                  <div className="custom-panel">
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: 'rgba(0, 0, 0, 0.88)',
+                        lineHeight: '20px',
+                        marginBottom: 8
+                      }}
+                    >
+                      Sub Color Picker
+                    </div>
+                    {panel}
+                  </div>
+                )}
+                onChange={(value: Color, hex: string) => onChangeSubColor(hex)}
               />
             </div>
             <div className="detail-wrapper-default-btns">
@@ -254,7 +389,7 @@ export const ArticleDetail = () => {
         onCancel={onVisibleThumbModal}
         okText={`${thumbnail ? '썸네일 변경' : '썸네일 추가'}`}
         data={thumbnail}
-        isLoading={isLoading}
+        isLoading={isFetching}
         isEdit={isEdit}
         onChangeUploadFile={onChangeUploadFile}
         onOk={onOkUploadThumbnail}

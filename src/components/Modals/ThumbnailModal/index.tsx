@@ -1,5 +1,5 @@
 // base
-import React, { useMemo, useState } from 'react';
+import React, { Key, useEffect, useMemo, useState } from 'react';
 
 // styles
 import { StyledThumbnailModal } from './style';
@@ -37,7 +37,7 @@ export const ThumbnailModal: React.FC<ThumbnailModalProps> = ({
   ...props
 }) => {
   const [activeImage, setActiveImage] = useState<any>(null);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
 
   const columns = useMemo(() => {
     return [
@@ -56,8 +56,7 @@ export const ThumbnailModal: React.FC<ThumbnailModalProps> = ({
       {
         key: 'mimetype',
         title: '파일 타입',
-        dataIndex: 'mimetype',
-        render: (text: string) => text.split('/')[1]
+        dataIndex: 'mimetype'
       }
     ];
   }, []);
@@ -99,12 +98,7 @@ export const ThumbnailModal: React.FC<ThumbnailModalProps> = ({
       return file;
     }) as any[];
 
-    console.log('== info == : ', info);
-    console.log('== newFileList == : ', newFileList);
-
     const lastItme = newFileList[newFileList.length - 1];
-
-    console.log('== lastItme == : ', lastItme);
 
     setActiveImage(lastItme);
     setSelectedRowKeys([lastItme.sequence]);
@@ -138,6 +132,13 @@ export const ThumbnailModal: React.FC<ThumbnailModalProps> = ({
     onOk();
   };
 
+  useEffect(() => {
+    if (!isEdit || thumnaillist.length < 1) return;
+
+    setSelectedRowKeys([1]);
+    setActiveImage(thumnaillist[0]);
+  }, [isEdit]);
+
   return (
     <StyledThumbnailModal
       {...props}
@@ -148,7 +149,7 @@ export const ThumbnailModal: React.FC<ThumbnailModalProps> = ({
       footer={
         <div className="thumbnail-wrapper-footer">
           <BasicButton btnText="닫기" onClick={onCancel} />
-          <BasicButton btnText="삭제" onClick={handleRemoveFile} />
+          <BasicButton btnText="삭제" disabled onClick={handleRemoveFile} />
           <Upload
             listType="picture"
             showUploadList={false}
@@ -157,10 +158,10 @@ export const ThumbnailModal: React.FC<ThumbnailModalProps> = ({
             onChange={handleUpload}
             customRequest={() => true}
           >
-            <BasicButton btnText="업로드" />
+            <BasicButton btnText="업로드" disabled={isEdit} />
           </Upload>
 
-          <BasicButton btnText="저장" onClick={handleOk} />
+          <BasicButton btnText="저장" disabled={isEdit} onClick={handleOk} />
         </div>
       }
     >
