@@ -15,10 +15,19 @@ export interface ArticleTagsProps {
 
 export interface ArticleThumbnaiProps {
   id: string;
-  location: string;
-  mimetype: string;
+  bucket: string;
+  key: string;
+  filename: string;
   originalname: string;
+  encoding: string;
+  mimetype: string;
   size: number;
+  location: string;
+  createdAt: string;
+  updatedAt: string;
+  sequence: number;
+  folder: string;
+  contentType: string;
 }
 
 export interface ArticleListsProps {
@@ -28,16 +37,25 @@ export interface ArticleListsProps {
     username: string;
     email: string;
   };
-  catergoty?: string | null;
+  catergoty?: {
+    id: string;
+    catergotyName: string;
+    catergotyNumber: number;
+    subCatergotyNumber: number;
+  };
+  title: string;
   content: string;
   expose: boolean;
+  mainExpose: boolean;
   commentCount: number;
   likeCount: number;
   readCount: number;
   createdAt: string;
   updatedAt: string;
+  mainColor: string;
+  subColor: string;
   tags: ArticleTagsProps[];
-  thumbnail: ArticleThumbnaiProps[];
+  thumbnails: ArticleThumbnaiProps[];
 }
 
 export interface ResponseArticleLists extends BaseResponseProps {

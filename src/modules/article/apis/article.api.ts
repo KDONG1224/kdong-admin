@@ -34,12 +34,24 @@ export class ArticleApi {
   }
 
   async updateArticleById(id: string, data: any) {
-    return await this.Axios.patch(`/posts/${id}`, data).then((res) => res.data);
+    return await this.Axios.patch(`/posts/${id}`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    }).then((res) => res.data);
   }
 
-  async updateArticleExposeById(id: string) {
+  async updateArticleExposeById(id: string, data: { expose: boolean }) {
     return await this.Axios.post<ResponseArticleLists>(
-      `/posts/expose/${id}`
+      `/posts/expose/${id}`,
+      data
+    ).then((res) => res.data);
+  }
+
+  async updateArticleMainExposeById(id: string, data: { mainExpose: boolean }) {
+    return await this.Axios.post<ResponseArticleLists>(
+      `/posts/expose/main/${id}`,
+      data
     ).then((res) => res.data);
   }
 }

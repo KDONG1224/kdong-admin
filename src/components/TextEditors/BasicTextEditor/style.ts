@@ -75,6 +75,48 @@ export const StyledBasicTextEditor = styled.div<StyledBasicTextEditorProps>`
         font-size: 1.25em;
         line-height: 1.75;
       }
+
+      > ul {
+        font-size: 1.2em;
+        line-height: 1.4;
+
+        > li {
+          font-size: 1.2em;
+          line-height: 1.4;
+          list-style-type: disc;
+        }
+      }
+
+      blockquote {
+        background: #f4f8fa;
+        font-size: 1.25em;
+        line-height: 1.75;
+        font-weight: 400;
+        position: relative;
+        color: #575757;
+        padding: 22px 20px 18px 20px;
+        border-left: 5px solid #ff5821;
+      }
+
+      .table {
+        > table {
+          tbody {
+            > tr {
+              &:nth-child(odd) {
+                background-color: #f5f5f5;
+              }
+            }
+          }
+        }
+      }
+
+      .ck-editor__editable {
+        &.ck-editor__nested-editable {
+          font-size: 1.25em;
+          line-height: 1.75;
+          padding: 14px 12px 12px 12px;
+        }
+      }
     }
   }
 `;

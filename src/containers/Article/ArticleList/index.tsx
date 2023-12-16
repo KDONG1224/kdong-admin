@@ -1,5 +1,5 @@
 // base
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router';
 
 // styles
@@ -54,72 +54,6 @@ export const ArticleList = () => {
     return new ArticleApi();
   }, []);
 
-  const columns = useMemo(
-    () => [
-      { key: 'title', dataIndex: 'title', title: '제목' },
-      {
-        key: 'category',
-        dataIndex: 'category',
-        title: '카테고리',
-        render: (text: any) => (text ? text.categoryName : '')
-      },
-      { key: 'readCount', dataIndex: 'readCount', title: '조회수' },
-      { key: 'likeCount', dataIndex: 'likeCount', title: '좋아요' },
-      {
-        key: 'thumbnails',
-        dataIndex: 'thumbnails',
-        title: '썸네일',
-        render: (texts: ArticleThumbnaiProps[]) =>
-          texts && texts.length > 0 ? (
-            <LazyImage src={texts[0].location} width="100%" height={60} />
-          ) : (
-            '없음'
-          )
-      },
-      {
-        key: 'createdAt',
-        dataIndex: 'createdAt',
-        title: '생성일',
-        render: (text: string) => dayjs(text).format('YYYY-MM-DD')
-      },
-      {
-        key: 'updatedAt',
-        dataIndex: 'updatedAt',
-        title: '수정일',
-        render: (text: string) => dayjs(text).format('YYYY-MM-DD')
-      },
-      {
-        key: 'expose',
-        dataIndex: 'expose',
-        title: '노출여부',
-        render: (text: boolean, record: ArticleListsProps) => (
-          <Switch
-            checked={text}
-            onChange={() => onChangeArticleExpose(record)}
-          />
-        )
-      },
-      {
-        key: 'edit',
-        dataIndex: 'edit',
-        title: '수정',
-        render: (text: any, record) => (
-          <BasicButton
-            btnText="수정"
-            onClick={() => onChangeArticleEdit(record)}
-          />
-        )
-      }
-    ],
-    [isArticles]
-  );
-
-  const dataSource = useMemo(() => {
-    if (!isArticles) return [];
-
-    return isArticles;
-  }, [isArticles]);
-
   const { data: articles, isFetching } = useQuery<
     ResponseArticleLists,
     AxiosError,
@@ -153,8 +87,18 @@ export const ArticleList = () => {
 
   const { mutateAsync: changeExpose } = useMutation(
     [QUERY_EXPOSE_ARTICLE, articles],
-    async (id: string) => {
-      return await articleApi.updateArticleExposeById(id);
+    async (data: { id: string; type: 'main' | 'common'; expose: boolean }) => {
+      const { id, type, expose } = data;
+
+      if (type === 'main') {
+        const body = {
+          mainExpose: expose
+        };
+
+        return await articleApi.updateArticleMainExposeById(id, body);
+      }
+
+      return await articleApi.updateArticleExposeById(id, { expose });
     },
     {
       onSettled: () => {
@@ -163,15 +107,98 @@ export const ArticleList = () => {
     }
   );
 
-  const onChangeArticleExpose = (record: ArticleListsProps) => {
-    changeExpose(record.id);
-  };
+  const onChangeArticleExpose = useCallback(
+    (record: ArticleListsProps, type: 'main' | 'common') => {
+      changeExpose({ id: record.id, type, expose: !record.expose });
+    },
+    [changeExpose]
+  );
 
-  const onChangeArticleEdit = (record: ArticleListsProps) => {
-    history.push(ROUTE_ARTICLE_DETAIL_WITH_ID(record.id), {
-      articleId: record.id
-    });
-  };
+  const onChangeArticleEdit = useCallback(
+    (record: ArticleListsProps) => {
+      history.push(ROUTE_ARTICLE_DETAIL_WITH_ID(record.id), {
+        articleId: record.id
+      });
+    },
+    [history]
+  );
+
+  const dataSource = useMemo(() => {
+    if (!isArticles) return [];
+
+    return isArticles;
+  }, [isArticles]);
+
+  const columns = useMemo(
+    () => [
+      { key: 'title', dataIndex: 'title', title: '제목' },
+      {
+        key: 'category',
+        dataIndex: 'category',
+        title: '카테고리',
+        render: (text: any) => (text ? text.categoryName : '')
+      },
+      { key: 'readCount', dataIndex: 'readCount', title: '조회수' },
+      { key: 'likeCount', dataIndex: 'likeCount', title: '좋아요' },
+      {
+        key: 'thumbnails',
+        dataIndex: 'thumbnails',
+        title: '썸네일',
+        render: (texts: ArticleThumbnaiProps[]) =>
+          texts && texts.length > 0 ? (
+            <LazyImage src={texts[0].location} width="100%" height={100} />
+          ) : (
+            '없음'
+          )
+      },
+      {
+        key: 'createdAt',
+        dataIndex: 'createdAt',
+        title: '생성일',
+        render: (text: string) => dayjs(text).format('YYYY-MM-DD')
+      },
+      {
+        key: 'updatedAt',
+        dataIndex: 'updatedAt',
+        title: '수정일',
+        render: (text: string) => dayjs(text).format('YYYY-MM-DD')
+      },
+      {
+        key: 'mainExpose',
+        dataIndex: 'mainExpose',
+        title: '메인 노출여부',
+        render: (text: boolean, record: ArticleListsProps) => (
+          <Switch
+            checked={text}
+            onChange={() => onChangeArticleExpose(record, 'main')}
+          />
+        )
+      },
+      {
+        key: 'expose',
+        dataIndex: 'expose',
+        title: '노출여부',
+        render: (text: boolean, record: ArticleListsProps) => (
+          <Switch
+            checked={text}
+            onChange={() => onChangeArticleExpose(record, 'common')}
+          />
+        )
+      },
+      {
+        key: 'edit',
+        dataIndex: 'edit',
+        title: '수정',
+        render: (text: any, record) => (
+          <BasicButton
+            btnText="수정"
+            onClick={() => onChangeArticleEdit(record)}
+          />
+        )
+      }
+    ],
+    [onChangeArticleEdit, onChangeArticleExpose]
+  );
 
   const onChangeNewArticle = () => {
     history.push(ROUTE_ARTICLE_CREATE, {
@@ -201,7 +228,11 @@ export const ArticleList = () => {
           <PaginationTable
             columns={columns}
             dataSource={dataSource}
-            pagination={pagination}
+            pagination={{
+              ...pagination,
+              current:
+                totalElement === dataSource.length ? 1 : pagination.current
+            }}
             onChangePageSize={onChangePageSize}
             isLoading={isFetching}
             scroll={{ y: scrollY }}

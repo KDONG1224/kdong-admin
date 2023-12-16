@@ -1,5 +1,5 @@
 // base
-import { useEffect, useMemo, useState } from 'react';
+import { Key, useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router';
 
 // styles
@@ -22,7 +22,10 @@ import {
   QUERY_GET_ARTICLE_BY_ID
 } from 'modules/article';
 import { UploadFile } from 'antd/lib';
-import { ArticleDetailStateProps } from 'modules/article/models/article.model';
+import {
+  ArticleDetailStateProps,
+  ArticleThumbnaiProps
+} from 'modules/article/models/article.model';
 import {
   CategoryApi,
   CategoryListsProps,
@@ -32,6 +35,7 @@ import {
 import { AxiosError } from 'axios';
 import { uploadApi } from 'modules/upload';
 import { Color } from 'antd/es/color-picker';
+import { RcFile } from 'antd/es/upload';
 /**
  * 1) 카테고리 선택 만들기 (front + backend)
  * 2) 썸네일 추가 + 보기 만들기 (modal) === 완료
@@ -39,6 +43,14 @@ import { Color } from 'antd/es/color-picker';
  * 4) 수정 api 연동
  * 5) 수정 시 데이터 불러오기 + 화면 렌더링
  */
+export interface PRcFile extends RcFile {
+  sequence: number;
+  originalname: string;
+  mimetype: string;
+  location: string;
+  id: string | null;
+}
+
 export const ArticleDetail = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [title, setTitle] = useState<string>('');
@@ -46,12 +58,14 @@ export const ArticleDetail = () => {
   const [editorData, setEditorData] = useState('');
   const [category, setCategory] = useState<CategoryListsProps | null>(null);
   const [tags, setTags] = useState<string[]>(['KDONG']);
-  const [thumbnail, setThumbnail] = useState<UploadFile[]>([]);
   const [isThumbModal, setIsThumbModal] = useState(false);
-  const [thumbnailUrl, setThumbnailUrl] = useState<string>('');
-  const [thumnaillist, setThumnaillist] = useState<any[]>([]);
+  const [thumbnailLists, setThumbnailLists] = useState<
+    ArticleThumbnaiProps[] | PRcFile[]
+  >([]);
   const [mainColor, setMainColor] = useState<string>('#000000');
   const [subColor, setSubColor] = useState<string>('#f43f00');
+  const [hasThumbIds, setHasThumbIds] = useState<string[]>([]);
+  const [hasTagIds, setHasTagIds] = useState<string[]>([]);
 
   const queryClient = useQueryClient();
   const history = useHistory();
@@ -77,36 +91,6 @@ export const ArticleDetail = () => {
         if (!data) return;
 
         return data.result;
-      },
-      onSuccess: async (data) => {
-        if (!data) return;
-
-        const { title, content, tags, thumbnails, mainColor, subColor } = data;
-
-        const tagsArr =
-          tags && tags.length > 0 ? tags.map((tag: any) => tag.tag) : [];
-
-        const res = await Promise.all(
-          thumbnails.map(async (item: any, idx: number) => {
-            const file = await uploadApi.getS3Object(
-              item.location,
-              item.originalname,
-              item.mimetype
-            );
-
-            return {
-              file,
-              ...item
-            };
-          })
-        );
-
-        setTitle(title);
-        setEditorData(content);
-        setTags(tagsArr);
-        setThumnaillist(res);
-        setMainColor(mainColor);
-        setSubColor(subColor);
       },
       refetchOnWindowFocus: false,
       retry: false
@@ -134,8 +118,6 @@ export const ArticleDetail = () => {
     async (data: any) => {
       if (isEdit) {
         if (!locationState) return null;
-
-        console.log('== edit == :  ', data);
 
         return await articleApi.updateArticleById(
           locationState.articleId as string,
@@ -174,6 +156,56 @@ export const ArticleDetail = () => {
     }
   );
 
+  const onInitValues = useCallback(async () => {
+    try {
+      if (!articleDetail) return;
+
+      const { title, content, tags, thumbnails, mainColor, subColor } =
+        articleDetail;
+
+      const thumbIds = thumbnails.map((item: any) => item.id);
+      const tagIds = tags.map((item: any) => item.id);
+      const tagsArr = tags.length > 0 ? tags.map((tag: any) => tag.tag) : [];
+
+      const res = await Promise.all(
+        thumbnails.map(async (item: any, idx: number) => {
+          const file = await uploadApi.getS3Object(
+            item.location,
+            item.originalname,
+            item.mimetype
+          );
+
+          return {
+            file,
+            ...item
+          };
+        })
+      );
+
+      if (categories) {
+        if (!articleDetail) return;
+
+        const category = categories.find(
+          (r) => r && r.id === articleDetail.category.id
+        );
+
+        setCategory(category ? category : null);
+      }
+
+      setThumbnailLists(res);
+
+      setTitle(title);
+      setEditorData(content);
+      setTags(tagsArr);
+      setMainColor(mainColor);
+      setSubColor(subColor);
+      setHasThumbIds(thumbIds);
+      setHasTagIds(tagIds);
+    } catch (error) {
+      console.log(error);
+    }
+  }, [articleDetail, categories]);
+
   const onChangeTitle = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTitle(e.target.value);
   };
@@ -202,32 +234,35 @@ export const ArticleDetail = () => {
     setIsThumbModal((prev) => !prev);
   };
 
-  const onChangeUploadFile = (file: UploadFile[], originFile: any[]) => {
-    if (isEdit) {
-      console.log('== onChangeUploadFile : file == : ', file);
-      console.log('== onChangeUploadFile : originFile == : ', originFile);
-      console.log('== onChangeUploadFile : thumnaillist == : ', thumnaillist);
+  const onChangeUploadFile = (info: any) => {
+    const file = info.file;
+    const blob = new Blob([file.originFileObj], {
+      type: file.type
+    });
+    const blobUrl = URL.createObjectURL(blob);
 
-      // setThumbnail((prev: any) =>
-      //   [...prev, , ...file].map((item, idx) => ({
-      //     ...item,
-      //     // sequence: idx + 1
-      //   }))
-      // );
-      // setThumnaillist((prev: any) => [...prev, ...originFile]);
-      return;
-    }
-    setThumbnail(file);
-    setThumnaillist(originFile);
+    const lastItem = thumbnailLists[thumbnailLists.length - 1];
+
+    const newFile = {
+      ...file,
+      sequence: lastItem ? lastItem.sequence + 1 : 1,
+      originalname: file.name,
+      mimetype: file.type,
+      location: blobUrl
+    };
+
+    setThumbnailLists([...thumbnailLists, newFile]);
+  };
+
+  const onRemoveUploadFile = (index: Key) => {
+    const images = (thumbnailLists as ArticleThumbnaiProps[]).filter(
+      (_, idx) => idx !== index
+    );
+
+    setThumbnailLists(images);
   };
 
   const onOkUploadThumbnail = () => {
-    const newLists = thumnaillist.map((item, idx) => ({
-      ...item,
-      sequence: idx + 1
-    }));
-
-    setThumnaillist(newLists);
     onVisibleThumbModal();
   };
 
@@ -235,15 +270,29 @@ export const ArticleDetail = () => {
     try {
       const formData = new FormData();
 
-      console.log('== thumbnail == : ', thumbnail);
-      console.log('== thumnaillist == : ', thumnaillist);
-
-      thumbnail.forEach((file: any) => {
-        formData.append('thumbnails', file.originFileObj);
-      });
+      if (thumbnailLists.length > 0) {
+        thumbnailLists.forEach((list: any) => {
+          console.log('== list == : ', list);
+          if (list.originFileObj) {
+            formData.append('thumbnails', list.originFileObj);
+          } else {
+            formData.append('thumbnails', list.file);
+          }
+        });
+      }
 
       if (category) {
         formData.append('category', category.id);
+      }
+
+      if (isEdit) {
+        if (hasThumbIds) {
+          formData.append('hasThumbIds', hasThumbIds.join(',') as any);
+        }
+
+        if (hasTagIds) {
+          formData.append('hasTagIds', hasTagIds.join(',') as any);
+        }
       }
 
       formData.append('title', title);
@@ -258,16 +307,7 @@ export const ArticleDetail = () => {
     }
   };
 
-  useEffect(() => {
-    if (!categories || !articleDetail) return;
-
-    const category = categories.find(
-      (r) => r && r.id === articleDetail.category.id
-    );
-
-    setCategory(category ? category : null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categories]);
+  useEffect(() => {}, [categories]);
 
   useEffect(() => {
     if (locationState && locationState.articleId) {
@@ -279,19 +319,23 @@ export const ArticleDetail = () => {
 
   useEffect(() => {
     if (isEdit) {
-      if (thumbnailUrl) {
+      if (thumbnailLists) {
         setModalTitle('썸네일 보기');
       } else {
         setModalTitle('썸네일 추가');
       }
     } else {
-      if (thumbnail.length > 0) {
+      if (thumbnailLists.length > 0) {
         setModalTitle('썸네일 보기');
       } else {
         setModalTitle('썸네일 추가');
       }
     }
-  }, [isEdit, thumbnail, thumbnailUrl]);
+  }, [isEdit, thumbnailLists]);
+
+  useEffect(() => {
+    onInitValues();
+  }, [onInitValues]);
 
   return (
     <>
@@ -387,14 +431,14 @@ export const ArticleDetail = () => {
         modalTitle={modalTitle}
         open={isThumbModal}
         onCancel={onVisibleThumbModal}
-        okText={`${thumbnail ? '썸네일 변경' : '썸네일 추가'}`}
-        data={thumbnail}
+        okText={`${thumbnailLists ? '썸네일 변경' : '썸네일 추가'}`}
         isLoading={isFetching}
         isEdit={isEdit}
         onChangeUploadFile={onChangeUploadFile}
+        onRemoveUploadFile={onRemoveUploadFile}
         onOk={onOkUploadThumbnail}
-        thumnaillist={thumnaillist}
-        setThumnaillist={setThumnaillist}
+        thumbnailLists={thumbnailLists}
+        setThumbnailLists={setThumbnailLists}
       />
     </>
   );

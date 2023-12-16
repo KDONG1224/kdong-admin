@@ -9,30 +9,32 @@ import { BasicButton, DragSortTable, LazyImage } from 'components';
 
 // libraries
 import { ModalProps, Upload } from 'antd';
-import { RcFile, UploadChangeParam, UploadFile } from 'antd/es/upload';
+import { RcFile } from 'antd/es/upload';
 import type { DragEndEvent } from '@dnd-kit/core';
+import { PRcFile } from 'containers';
+import { ArticleThumbnaiProps } from 'modules/article';
 
 interface ThumbnailModalProps extends ModalProps {
   modalTitle?: string;
   isLoading?: boolean;
   isEdit: boolean;
-  data: UploadFile[];
-  thumnaillist: UploadFile[];
+  thumbnailLists: ArticleThumbnaiProps[] | PRcFile[];
   onOk: () => void;
   onCancel: () => void;
-  onChangeUploadFile: (file: UploadFile[], originFile: any[]) => void;
-  setThumnaillist: (file: UploadFile[]) => void;
+  onChangeUploadFile: (info: any) => void;
+  onRemoveUploadFile: (index: Key) => void;
+  setThumbnailLists: (values: ArticleThumbnaiProps[] | PRcFile[]) => void;
 }
 
 export const ThumbnailModal: React.FC<ThumbnailModalProps> = ({
   modalTitle = '파일 업로드',
   isLoading = false,
   isEdit,
-  data,
   onOk,
   onCancel,
-  thumnaillist,
-  setThumnaillist,
+  thumbnailLists,
+  setThumbnailLists,
+  onRemoveUploadFile,
   onChangeUploadFile,
   ...props
 }) => {
@@ -62,8 +64,8 @@ export const ThumbnailModal: React.FC<ThumbnailModalProps> = ({
   }, []);
 
   const dataSource = useMemo(() => {
-    return thumnaillist;
-  }, [thumnaillist]);
+    return thumbnailLists;
+  }, [thumbnailLists]);
 
   const onClickRow = (record: any) => {
     return {
@@ -74,36 +76,12 @@ export const ThumbnailModal: React.FC<ThumbnailModalProps> = ({
     };
   };
 
-  const handleUpload = (info: UploadChangeParam<UploadFile>) => {
+  const handleUpload = (info: any) => {
     if (info.file.status === 'error') {
       return false;
     }
 
-    const newFileList = info.fileList.map((file, idx) => {
-      if (file.originFileObj) {
-        const blob = new Blob([file.originFileObj], {
-          type: file.type
-        });
-        const blobUrl = URL.createObjectURL(blob);
-
-        return {
-          ...file.originFileObj,
-          sequence: idx + 1,
-          originalname: file.name,
-          mimetype: file.type,
-          location: blobUrl
-        };
-      }
-
-      return file;
-    }) as any[];
-
-    const lastItme = newFileList[newFileList.length - 1];
-
-    setActiveImage(lastItme);
-    setSelectedRowKeys([lastItme.sequence]);
-
-    onChangeUploadFile(info.fileList, newFileList);
+    onChangeUploadFile(info);
   };
 
   const handleRemoveFile = (
@@ -111,9 +89,7 @@ export const ThumbnailModal: React.FC<ThumbnailModalProps> = ({
   ) => {
     e.stopPropagation();
 
-    console.log('삭제');
-
-    // onChangeUploadFile([]);
+    onRemoveUploadFile(selectedRowKeys[0]);
   };
 
   const beforeUpload = (file: RcFile) => {
@@ -133,11 +109,13 @@ export const ThumbnailModal: React.FC<ThumbnailModalProps> = ({
   };
 
   useEffect(() => {
-    if (!isEdit || thumnaillist.length < 1) return;
+    if (thumbnailLists.length < 1) return;
 
-    setSelectedRowKeys([1]);
-    setActiveImage(thumnaillist[0]);
-  }, [isEdit]);
+    const lastItem = thumbnailLists[thumbnailLists.length - 1];
+
+    setSelectedRowKeys([lastItem.sequence]);
+    setActiveImage(lastItem);
+  }, [isEdit, thumbnailLists]);
 
   return (
     <StyledThumbnailModal
@@ -158,10 +136,10 @@ export const ThumbnailModal: React.FC<ThumbnailModalProps> = ({
             onChange={handleUpload}
             customRequest={() => true}
           >
-            <BasicButton btnText="업로드" disabled={isEdit} />
+            <BasicButton btnText="업로드" />
           </Upload>
 
-          <BasicButton btnText="저장" disabled={isEdit} onClick={handleOk} />
+          <BasicButton btnText="저장" onClick={handleOk} />
         </div>
       }
     >
@@ -174,10 +152,10 @@ export const ThumbnailModal: React.FC<ThumbnailModalProps> = ({
           <div className="thumbnail-wrapper-body-left">
             <DragSortTable
               columns={columns}
-              dataSource={dataSource}
+              dataSource={dataSource as ArticleThumbnaiProps[]}
               pagination={false}
               onRow={onClickRow}
-              setSequence={setThumnaillist as any}
+              setSequence={setThumbnailLists}
               onDragEnd={(e: DragEndEvent) => console.log(e)}
               rowSelection={{
                 selectedRowKeys

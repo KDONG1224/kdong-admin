@@ -177,19 +177,19 @@ export const BasicTextEditor: React.FC<BasicTextEditorProps> = ({
             options: [
               {
                 model: 'heading1',
-                view: 'h1',
+                view: 'h2',
                 title: 'Heading 1',
                 class: 'ck-heading_heading1'
               },
               {
                 model: 'heading2',
-                view: 'h2',
+                view: 'h3',
                 title: 'Heading 2',
                 class: 'ck-heading_heading2'
               },
               {
                 model: 'heading3',
-                view: 'h3',
+                view: 'h4',
                 title: 'Heading 3',
                 class: 'ck-heading_heading3'
               },
@@ -217,8 +217,6 @@ export const BasicTextEditor: React.FC<BasicTextEditorProps> = ({
         onError={(error) => console.log(error)}
         onChange={(event, editor) => {
           const data = editor.getData();
-
-          console.log('== data == : ', data);
 
           onChangeEditorData(data);
         }}
