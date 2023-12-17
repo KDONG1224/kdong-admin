@@ -46,7 +46,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "craco start --verbose",
+    "start": "craco start --verbose -p 5656",
     "start:dev": "REACT_APP_BUILD_MODE=dev craco start",
     "start:prod": "REACT_APP_BUILD_MODE=prod craco start",
     "build": "GENERATE_SOURCEMAP=false craco build",
