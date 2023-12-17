@@ -46,12 +46,13 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "craco start --verbose -p 5656",
+    "serve": "pm2 reload ecosystem.config.js --name kdong-admin",
+    "start": "craco start --verbose",
     "start:dev": "REACT_APP_BUILD_MODE=dev craco start",
-    "start:prod": "REACT_APP_BUILD_MODE=prod craco start",
+    "start:prod": "REACT_APP_BUILD_MODE=prod pm2 reload ecosystem.config.js --name kdong-admin",
     "build": "GENERATE_SOURCEMAP=false craco build",
-    "build:dev": "craco build REACT_APP_BUILD_MODE=dev GENERATE_SOURCEMAP=false",
-    "build:prod": "REACT_APP_BUILD_MODE=prod GENERATE_SOURCEMAP=false craco build"
+    "build:dev": "REACT_APP_BUILD_MODE=dev GENERATE_SOURCEMAP=false craco build",
+    "build-prod": "REACT_APP_BUILD_MODE=prod GENERATE_SOURCEMAP=false craco build"
   },
   "eslintConfig": {
     "extends": [
