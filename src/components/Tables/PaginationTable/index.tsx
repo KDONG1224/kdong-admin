@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { Key, useEffect, useMemo, useRef, useState } from 'react';
 import { StyledPaginationTable } from './style';
 import { Button, Col, Row, Select, Space, Table } from 'antd';
 
@@ -63,13 +63,13 @@ export const PaginationTable = <T extends {}>({
     if (showRowSelection) {
       return {
         selectedRowKeys,
-        onChange: (value: React.ReactText[]) => {
-          setSelectedRowKeys(value as string[]);
+        onChange: (selectedRowKeys: Key[], selectedRows: T[]) => {
+          setSelectedRowKeys(selectedRowKeys as string[]);
         },
         ...tableOptions.rowSelection
       };
     } else {
-      return;
+      return undefined;
     }
   }, [tableOptions.rowSelection, selectedRowKeys, showRowSelection]);
 
@@ -155,7 +155,7 @@ export const PaginationTable = <T extends {}>({
       <Table
         {...tableOptions}
         pagination={pagination}
-        // rowSelection={rowSelection || {}}
+        rowSelection={rowSelection}
         loading={isLoading}
         columns={
           noIndex

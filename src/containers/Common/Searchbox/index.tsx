@@ -35,11 +35,13 @@ interface customFormItems {
 }
 
 interface SearchboxProps {
+  noBasic?: boolean;
   customFormItems?: customFormItems[];
   onSearch: <T extends AdditionalProps>(values: T) => void;
 }
 
 export const Searchbox: React.FC<SearchboxProps> = ({
+  noBasic = false,
   customFormItems,
   onSearch
 }) => {

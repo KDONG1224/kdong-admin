@@ -16,6 +16,7 @@ export const ROUTE_PROFILE_FAQ = `${ROUTE_PROFILE}/faq`;
 // 유저관리
 export const ROUTE_USER = '/user';
 export const ROUTE_USER_MANAGEMENT = `${ROUTE_USER}/management`;
+export const ROUTE_USER_EMAIL = `${ROUTE_USER}/email`;
 
 // 게시글
 export const ROUTE_ARTICLE = '/article';

@@ -33,6 +33,7 @@ import {
   ROUTE_SETTING,
   ROUTE_SIGN_IN,
   ROUTE_USER,
+  ROUTE_USER_EMAIL,
   ROUTE_USER_MANAGEMENT
 } from 'routes/const';
 
@@ -49,6 +50,7 @@ import {
 } from '@ant-design/icons';
 import { MenuInfo } from 'rc-menu/lib/interface';
 import { useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil';
+import { get } from 'http';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -74,7 +76,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       getItem('FAQ', ROUTE_PROFILE_FAQ)
     ]),
     getItem('유저관리', ROUTE_USER, <TeamOutlined />, [
-      getItem('유저목록', ROUTE_USER_MANAGEMENT)
+      getItem('유저목록', ROUTE_USER_MANAGEMENT),
+      getItem('이메일 요청', ROUTE_USER_EMAIL)
     ]),
     getItem('게시글', ROUTE_ARTICLE, <ReadOutlined />, [
       getItem('게시글 목록', ROUTE_ARTICLE_LIST),
@@ -114,11 +117,13 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   };
 
   useEffect(() => {
+    if (collapsed) return;
+
     const openkey = `/${pathname.split('/').filter(Boolean)[0]}`;
 
     setActiveKey([pathname]);
     setOpenKeys([openkey]);
-  }, [pathname]);
+  }, [collapsed, pathname]);
 
   return (
     <StyledMainLayout>

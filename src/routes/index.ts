@@ -37,6 +37,10 @@ export const routes: Routes = {
       component: pages.LazyUserMangementPage
     },
     {
+      path: paths.ROUTE_USER_EMAIL,
+      component: pages.LazyUserEmailPage
+    },
+    {
       path: paths.ROUTE_PROFILE_KDONG,
       component: pages.LazyProfileKdongPage
     },

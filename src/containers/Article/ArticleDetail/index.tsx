@@ -175,6 +175,12 @@ export const ArticleDetail = () => {
             item.mimetype
           );
 
+          if (!file) {
+            return {
+              ...item
+            };
+          }
+
           return {
             file,
             ...item

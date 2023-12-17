@@ -68,6 +68,10 @@ class AxiosInstanceCreator {
         return res;
       },
       (error) => {
+        if (error.response.data.message.includes('토큰')) {
+          clearUserToken();
+        }
+
         throw error;
       }
     );

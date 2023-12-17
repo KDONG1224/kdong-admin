@@ -146,7 +146,12 @@ export const ArticleList = () => {
         title: '썸네일',
         render: (texts: ArticleThumbnaiProps[]) =>
           texts && texts.length > 0 ? (
-            <LazyImage src={texts[0].location} width="100%" height={100} />
+            <LazyImage
+              src={texts[0].location}
+              width="100%"
+              height={100}
+              style={{ objectFit: 'contain', background: '#f5f5f5' }}
+            />
           ) : (
             '없음'
           )
@@ -233,6 +238,7 @@ export const ArticleList = () => {
               current:
                 totalElement === dataSource.length ? 1 : pagination.current
             }}
+            showRowSelection={false}
             onChangePageSize={onChangePageSize}
             isLoading={isFetching}
             scroll={{ y: scrollY }}
