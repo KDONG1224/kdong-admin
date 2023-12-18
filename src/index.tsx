@@ -23,12 +23,10 @@ import 'dayjs/locale/ko';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      suspense: true,
-    },
-  },
-})
-
-
+      suspense: true
+    }
+  }
+});
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

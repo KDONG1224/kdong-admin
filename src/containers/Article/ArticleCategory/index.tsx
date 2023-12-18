@@ -17,7 +17,7 @@ import {
 import { CategoryApi } from 'modules/category';
 
 // libraries
-import { Table } from 'antd';
+import { Table, message } from 'antd';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 export const ArticleCategory = () => {
@@ -105,6 +105,9 @@ export const ArticleCategory = () => {
         );
 
         setSubCategories(sortedData);
+      },
+      onError: (error) => {
+        console.log(error);
       }
     }
   );
@@ -116,11 +119,11 @@ export const ArticleCategory = () => {
     },
     {
       select: (data) => data.result.categories,
-      onSuccess: (data) => {
+      onSuccess: async (data) => {
         if (!data) return;
 
         setSelectedRowKeys([data[0].id]);
-        getSubCategory(data[0].id);
+        await getSubCategory(data[0].id);
       }
     }
   );
@@ -131,7 +134,7 @@ export const ArticleCategory = () => {
       return await categoryApi.createCategory(data);
     },
     {
-      onSuccess: (data) => {
+      onSuccess: async (data) => {
         if (!data) return;
 
         const findMainCategory = mainCategories?.find(
@@ -139,7 +142,7 @@ export const ArticleCategory = () => {
         );
 
         if (findMainCategory) {
-          getSubCategory(findMainCategory.id);
+          await getSubCategory(findMainCategory.id);
         }
 
         onVisibleEditModal();
@@ -157,7 +160,7 @@ export const ArticleCategory = () => {
       return await categoryApi.updateCategory(id, data);
     },
     {
-      onSuccess: (data) => {
+      onSuccess: async (data) => {
         if (!data) return;
 
         const findMainCategory = mainCategories?.find(
@@ -165,7 +168,7 @@ export const ArticleCategory = () => {
         );
 
         if (findMainCategory) {
-          getSubCategory(findMainCategory.id);
+          await getSubCategory(findMainCategory.id);
         }
 
         onVisibleEditModal();
@@ -182,9 +185,13 @@ export const ArticleCategory = () => {
 
   const onMainRowClick = (record: any) => {
     return {
-      onClick: () => {
-        setSelectedRowKeys([record.id]);
-        getSubCategory(record.id);
+      onClick: async () => {
+        try {
+          setSelectedRowKeys([record.id]);
+          await getSubCategory(record.id);
+        } catch (e: any) {
+          message.error(e.message);
+        }
       }
     };
   };
@@ -193,29 +200,37 @@ export const ArticleCategory = () => {
     setIsActiveValue(value);
   };
 
-  const onEditCategorySubmit = () => {
-    if (!isEdit) {
-      const lastItem = subCategories[subCategories.length - 1];
+  const onEditCategorySubmit = async () => {
+    try {
+      if (!isEdit) {
+        const lastItem = subCategories[subCategories.length - 1];
 
-      if (!isActiveValue) return;
+        if (!isActiveValue) return;
 
-      createSubCategory({
-        categoryName: isActiveValue,
-        categoryNumber: lastItem.categoryNumber,
-        subCategoryNumber: lastItem.subCategoryNumber + 1
-      });
+        await createSubCategory({
+          categoryName: isActiveValue,
+          categoryNumber: lastItem.categoryNumber,
+          subCategoryNumber: lastItem.subCategoryNumber + 1
+        });
 
-      return;
-    }
-
-    if (!isSelectRow) return;
-
-    updateCategory({
-      id: isSelectRow.id as string,
-      data: {
-        categoryName: isActiveValue
+        return;
       }
-    });
+
+      if (!isSelectRow) return;
+
+      await updateCategory({
+        id: isSelectRow.id as string,
+        data: {
+          categoryName: isActiveValue
+        }
+      });
+    } catch (e: any) {
+      onVisibleEditModal();
+      setIsSelectRow(null);
+      setIsActiveValue('');
+
+      message.error(e.message);
+    }
   };
 
   return (

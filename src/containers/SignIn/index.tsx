@@ -1,5 +1,5 @@
 // base
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useHistory } from 'react-router';
 
 // style
@@ -10,7 +10,7 @@ import { BasicButton, PasswordModal } from 'components';
 
 // modules
 import { RequestSignIn } from 'modules';
-import { authApi, userLoginState } from 'modules/auth';
+import { AuthApi, userLoginState } from 'modules/auth';
 
 // services
 import {
@@ -43,6 +43,10 @@ export const SignIn = () => {
 
   const [form] = useForm();
   const hisyory = useHistory();
+
+  const authApi = useMemo(() => {
+    return new AuthApi();
+  }, []);
 
   const onChangePasswordVisible = () => {
     setPasswordVisible((prev) => !prev);

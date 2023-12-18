@@ -25,6 +25,7 @@ import {
   ROUTE_ARTICLE_LIST,
   ROUTE_EVENT,
   ROUTE_GUESTBOOK,
+  ROUTE_GUESTBOOK_LIST,
   ROUTE_PROFILE,
   ROUTE_PROFILE_BANNER,
   ROUTE_PROFILE_FAQ,
@@ -50,7 +51,6 @@ import {
 } from '@ant-design/icons';
 import { MenuInfo } from 'rc-menu/lib/interface';
 import { useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil';
-import { get } from 'http';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -71,7 +71,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const items: MenuItem[] = [
     getItem('대시보드', ROUTE_ROOT, <AppstoreOutlined />),
     getItem('프로필', ROUTE_PROFILE, <UserOutlined />, [
-      getItem('KDONG', ROUTE_PROFILE_KDONG),
+      // getItem('KDONG', ROUTE_PROFILE_KDONG),
       getItem('메인 배너', ROUTE_PROFILE_BANNER),
       getItem('FAQ', ROUTE_PROFILE_FAQ)
     ]),
@@ -83,7 +83,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       getItem('게시글 목록', ROUTE_ARTICLE_LIST),
       getItem('게시글 카테고리', ROUTE_ARTICLE_CATEGORY)
     ]),
-    getItem('방명록', ROUTE_GUESTBOOK, <ContactsOutlined />),
+    getItem('방명록', ROUTE_GUESTBOOK, <ContactsOutlined />, [
+      getItem('방명록 목록', ROUTE_GUESTBOOK_LIST)
+    ]),
     getItem('이벤트', ROUTE_EVENT, <BuildOutlined />),
     getItem('Setting', ROUTE_SETTING, <SettingOutlined />)
   ];

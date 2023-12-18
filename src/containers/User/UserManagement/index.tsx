@@ -1,18 +1,36 @@
-import React, { useMemo, useState } from 'react';
+// base
+import { useEffect, useMemo, useState } from 'react';
+
+// styles
 import { StyledUserManagement } from './style';
-import { Searchbox } from 'containers';
-import { LazyImage, PaginationTable } from 'components';
-import { useTargetScroll, usePagination } from 'hooks';
-import { useQuery } from '@tanstack/react-query';
+
+// comp[onents
+import { PaginationTable } from 'components';
+
+// modules
 import { QUERY_GET_ALL_USERS } from 'modules';
 import { userApi } from 'modules/user/apis/user.api';
-import { AxiosError } from 'axios';
+
+// hooks
+import { useTargetScroll, usePagination } from 'hooks';
+
+// utils
 import { addHyphen } from 'utils';
+
+// libraries
 import dayjs from 'dayjs';
+import { useQuery } from '@tanstack/react-query';
 
 export const UserManagement = () => {
+  const [userLists, setUserLists] = useState<any[]>([]);
+  const [totalElement, setTotalElement] = useState(0);
+
   const { scrollY } = useTargetScroll({
     y: 0
+  });
+
+  const { pagination, onChangePageSize } = usePagination({
+    totalElement: totalElement
   });
 
   const columns = useMemo(
@@ -41,45 +59,50 @@ export const UserManagement = () => {
     []
   );
 
-  const { data } = useQuery(
+  const dataSource = useMemo(() => {
+    if (!userLists) return [];
+
+    return userLists;
+  }, [userLists]);
+
+  const { data: resultLists } = useQuery(
     [QUERY_GET_ALL_USERS],
-     async () => await userApi.getAllUsers(),
-     {
-      select: (data) => data
+    async () => await userApi.getAllUsers(),
+    {
+      select: (data) => data.result
     }
   );
 
-  const { pagination, onChangePageSize } = usePagination({
-    totalElement: data.totalElement 
-  });
+  // const onSearch = (values: any) => {
+  //   console.log(values);
+  // };
 
-  const onSearch = (values: any) => {
-    console.log(values);
-  };
+  useEffect(() => {
+    if (!resultLists) return;
 
-  console.log('== data == : ', data);
-  console.log('== pagination == : ', pagination);
-
-  // if (isFetching) return <div>Loading...</div>;
+    setUserLists(resultLists.users);
+    setTotalElement(resultLists.totalElement);
+  }, [resultLists]);
 
   return (
     <StyledUserManagement>
       <div className="management-wrapper">
-        <div className="management-wrapper-search">
+        {/* <div className="management-wrapper-search">
           <Searchbox onSearch={onSearch} />
-        </div>
+        </div> */}
 
         <div className="management-wrapper-table">
           <PaginationTable
             columns={columns}
-            dataSource={data.result}
-            pagination={data && data.result.length < 2 ? {
+            dataSource={dataSource}
+            pagination={{
               ...pagination,
-              current: 1
-            }: pagination}
+              current:
+                totalElement === dataSource.length ? 1 : pagination.current
+            }}
             onChangePageSize={onChangePageSize}
             scroll={{ y: scrollY }}
-            onChangeExpose={(value: boolean) => console.log('== value == : ', value)}
+            showRowSelection={false}
           />
         </div>
       </div>

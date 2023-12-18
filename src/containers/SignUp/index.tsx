@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { StyledSignUp } from './style';
-import { DatePicker, Form, Input } from 'antd';
+import { DatePicker, Form, Input, message } from 'antd';
 import {
   UserOutlined,
   LockOutlined,
@@ -16,7 +16,7 @@ import { useHistory } from 'react-router';
 import { ROUTE_SIGN_UP } from 'routes/const';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { authApi } from 'modules/auth';
+import { AuthApi } from 'modules/auth';
 
 export const SignUp = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -25,55 +25,58 @@ export const SignUp = () => {
   const hisyory = useHistory();
   const queryClient = useQueryClient();
 
+  const authApi = useMemo(() => {
+    return new AuthApi();
+  }, []);
+
   const onChangePasswordVisible = () => {
     setPasswordVisible((prev) => !prev);
   };
 
   const { mutateAsync } = useMutation(
+    ['QUERY_SIGN_UP'],
     async (data: any) => await authApi.userSignUp(data),
     {
       onSuccess: (data) => {
-        console.log('-- signup success --', data);
+        message.success('회원가입에 성공하였습니다.');
 
-        // hisyory.push(ROUTE_SIGN_UP);
+        hisyory.push(ROUTE_SIGN_UP);
 
-        return queryClient.invalidateQueries(['GET_LECTURE_LIST']);
+        return queryClient.invalidateQueries(['QUERY_SIGN_UP']);
       },
       onMutate: async () => {
-        const previousData = queryClient.getQueryData(['GET_LECTURE_LIST']);
-        await queryClient.cancelQueries(['GET_LECTURE_LIST']);
+        const previousData = queryClient.getQueryData(['QUERY_SIGN_UP']);
+        await queryClient.cancelQueries(['QUERY_SIGN_UP']);
 
         return { previousData };
       },
 
       onError: (data, values, context) => {
-        console.log('== data == : ', data);
-        console.log('== values == : ', values);
-        console.log('== context == : ', context);
-
         if (context?.previousData) {
-          queryClient.setQueryData(['GET_LECTURE_LIST'], context.previousData);
+          queryClient.setQueryData(['QUERY_SIGN_UP'], context.previousData);
         }
-
-        alert('회원가입에 실패하였습니다.');
 
         return;
       },
       onSettled: () => {
-        return queryClient.invalidateQueries(['GET_LECTURE_LIST']);
+        return queryClient.invalidateQueries(['QUERY_SIGN_UP']);
       }
     }
   );
 
-  const onSubmit = (values: any) => {
-    const { birthday, ...rest } = values;
+  const onSubmit = async (values: any) => {
+    try {
+      const { birthday, ...rest } = values;
 
-    const result = {
-      ...rest,
-      birthday: birthday.format('YYYYMMDD')
-    };
+      const result = {
+        ...rest,
+        birthday: birthday.format('YYYYMMDD')
+      };
 
-    mutateAsync(result);
+      await mutateAsync(result);
+    } catch (e: any) {
+      message.error(e.message[0] || e.message);
+    }
   };
 
   const onSignIn = () => {

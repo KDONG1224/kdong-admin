@@ -51,6 +51,10 @@ export const routes: Routes = {
     {
       path: paths.ROUTE_PROFILE_FAQ,
       component: pages.LazyProfileFaqPage
+    },
+    {
+      path: paths.ROUTE_GUESTBOOK_LIST,
+      component: pages.LazyGuestbookListPage
     }
   ]
 };

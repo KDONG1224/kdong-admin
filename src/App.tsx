@@ -18,6 +18,7 @@ import { ROUTE_SIGN_IN, ROUTE_SIGN_UP } from 'routes/const';
 import styled from 'styled-components';
 import { useRecoilValue } from 'recoil';
 import { loadingState } from 'modules/ui';
+import { message } from 'antd';
 
 const StyledApp = styled.div`
   height: 100vh;
@@ -26,6 +27,13 @@ const StyledApp = styled.div`
 const App = () => {
   const loading = useRecoilValue(loadingState);
 
+  message.config({
+    top: 50,
+    duration: 2,
+    maxCount: 1,
+    rtl: true
+  });
+
   const checkUser = (user: any) => {
     const arr = ['ADMIN', 'CLIENT', 'USER'];
     const checkArr = arr.every((item) => user?.accountType === item);
@@ -33,12 +41,11 @@ const App = () => {
     return !checkArr;
   };
 
-  console.log('== loading == : ', loading);
-
   return (
     <Router>
       <StyledApp className="App">
         {loading && <PageLoader />}
+
         <Suspense fallback={<PageLoader />}>
           <Switch>
             <Route path={ROUTE_SIGN_IN} component={LazySignInPage} />

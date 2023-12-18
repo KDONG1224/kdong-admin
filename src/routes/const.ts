@@ -34,6 +34,7 @@ export const ROUTE_ARTICLE_CATEGORY = `${ROUTE_ARTICLE}/category`;
 
 // 방명록
 export const ROUTE_GUESTBOOK = '/guestbook';
+export const ROUTE_GUESTBOOK_LIST = `${ROUTE_GUESTBOOK}/list`;
 
 // 이벤트
 export const ROUTE_EVENT = '/event';

@@ -37,12 +37,15 @@ import {
   InputNumber,
   Row,
   Slider,
-  Upload
+  Upload,
+  message
 } from 'antd';
 import { RcFile } from 'antd/es/upload';
 import { useForm } from 'antd/es/form/Form';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSetRecoilState } from 'recoil';
+import { loadingState } from 'modules/ui';
 
 interface PRcFile extends RcFile {
   sequence: number;
@@ -61,6 +64,8 @@ export const ProfileBanner = () => {
   const [initialValues, setInitialValues] = useState<BannerListsProps>();
   const [hasThumbIds, setHasThumbIds] = useState<string[]>([]);
 
+  const setLoading = useSetRecoilState(loadingState);
+
   const [form] = useForm();
   const queryClient = useQueryClient();
 
@@ -68,7 +73,7 @@ export const ProfileBanner = () => {
     return new ProfileApi();
   }, []);
 
-  const { data: bannerLists } = useQuery<
+  const { data: bannerLists, isLoading } = useQuery<
     ResponseProfileProps,
     AxiosError,
     BannerListsProps
@@ -237,8 +242,8 @@ export const ProfileBanner = () => {
       formData.append('autoPlay', values.autoPlay);
 
       await updateBanner(formData);
-    } catch (e) {
-      console.log(e);
+    } catch (e: any) {
+      message.error(e.message);
     }
   };
 
@@ -247,6 +252,10 @@ export const ProfileBanner = () => {
 
     onInitValues();
   }, [bannerLists, form, onInitValues]);
+
+  useEffect(() => {
+    setLoading(isLoading);
+  }, [isLoading, setLoading]);
 
   return (
     <StyledProfileBanner>

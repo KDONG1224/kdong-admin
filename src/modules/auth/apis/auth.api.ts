@@ -1,13 +1,25 @@
 import AxiosInstanceCreator from 'services/api';
 import { UserAccount } from '../models/auth.model';
+import { AxiosInstance } from 'axios';
 
-export const authInstance = new AxiosInstanceCreator({
-  baseURL: `${process.env.REACT_APP_API_URL}/auth`
-}).create();
+export class AuthApi {
+  Axios: AxiosInstance;
 
-export const authApi = {
-  usersLogin: async (data: UserAccount) =>
-    await authInstance.post<any>('/login', data).then((res) => res.data),
-  userSignUp: async (data: UserAccount) =>
-    await authInstance.post<any>('/signup', data).then((res) => res.data)
-};
+  constructor() {
+    this.Axios = new AxiosInstanceCreator({
+      baseURL: `${process.env.REACT_APP_API_URL}`
+    }).create();
+  }
+
+  async usersLogin(data: UserAccount) {
+    return await this.Axios.post<any>('/auth/login', data).then(
+      (res) => res.data
+    );
+  }
+
+  async userSignUp(data: UserAccount) {
+    return await this.Axios.post<any>('/auth/signup', data).then(
+      (res) => res.data
+    );
+  }
+}

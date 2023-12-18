@@ -12,7 +12,7 @@ import {
   RequestProfileFaqFormProps,
   ResponseProfileFaqProps
 } from 'modules/profile';
-import { Switch } from 'antd';
+import { Switch, message } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
@@ -86,8 +86,6 @@ export const ProfileFaq = () => {
     }
   );
 
-  console.log('== resultFaqLists == : ', resultFaqLists);
-
   const columns = useMemo(() => {
     return [
       // {
@@ -127,7 +125,7 @@ export const ProfileFaq = () => {
             checked={text}
             onChange={() => {
               setEditFaq(record);
-              changeExpose();
+              onChangeExpose();
             }}
           />
         )
@@ -174,10 +172,20 @@ export const ProfileFaq = () => {
     setFaqLists(values);
   };
 
-  const onFinish = (values: RequestProfileFaqFormProps) => {
-    console.log(values);
+  const onFinish = async (values: RequestProfileFaqFormProps) => {
+    try {
+      await mutateAsync(values);
+    } catch (e: any) {
+      message.error(e.message);
+    }
+  };
 
-    mutateAsync(values);
+  const onChangeExpose = async () => {
+    try {
+      await changeExpose();
+    } catch (e: any) {
+      message.error(e.message);
+    }
   };
 
   useEffect(() => {

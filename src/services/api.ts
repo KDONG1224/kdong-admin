@@ -72,7 +72,7 @@ class AxiosInstanceCreator {
           clearUserToken();
         }
 
-        throw error;
+        throw error.response.data;
       }
     );
   }

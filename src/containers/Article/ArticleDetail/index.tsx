@@ -14,7 +14,7 @@ import {
 } from 'components';
 
 // libraries
-import { ColorPicker, Input, Select } from 'antd';
+import { ColorPicker, Input, Select, message } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArticleApi,
@@ -36,13 +36,9 @@ import { AxiosError } from 'axios';
 import { uploadApi } from 'modules/upload';
 import { Color } from 'antd/es/color-picker';
 import { RcFile } from 'antd/es/upload';
-/**
- * 1) 카테고리 선택 만들기 (front + backend)
- * 2) 썸네일 추가 + 보기 만들기 (modal) === 완료
- * 3) 저장 api 연동 === 완료
- * 4) 수정 api 연동
- * 5) 수정 시 데이터 불러오기 + 화면 렌더링
- */
+import { useSetRecoilState } from 'recoil';
+import { loadingState } from 'modules/ui';
+
 export interface PRcFile extends RcFile {
   sequence: number;
   originalname: string;
@@ -66,6 +62,8 @@ export const ArticleDetail = () => {
   const [subColor, setSubColor] = useState<string>('#f43f00');
   const [hasThumbIds, setHasThumbIds] = useState<string[]>([]);
   const [hasTagIds, setHasTagIds] = useState<string[]>([]);
+
+  const setLoading = useSetRecoilState(loadingState);
 
   const queryClient = useQueryClient();
   const history = useHistory();
@@ -114,7 +112,7 @@ export const ArticleDetail = () => {
     }
   );
 
-  const { mutateAsync } = useMutation(
+  const { mutateAsync, isLoading } = useMutation(
     async (data: any) => {
       if (isEdit) {
         if (!locationState) return null;
@@ -155,6 +153,8 @@ export const ArticleDetail = () => {
       }
     }
   );
+
+  console.log('== isLoading == : ', isLoading);
 
   const onInitValues = useCallback(async () => {
     try {
@@ -308,12 +308,10 @@ export const ArticleDetail = () => {
       formData.append('subColor', subColor);
 
       await mutateAsync(formData);
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      message.error(error.message);
     }
   };
-
-  useEffect(() => {}, [categories]);
 
   useEffect(() => {
     if (locationState && locationState.articleId) {
@@ -338,6 +336,10 @@ export const ArticleDetail = () => {
       }
     }
   }, [isEdit, thumbnailLists]);
+
+  useEffect(() => {
+    setLoading(isLoading);
+  }, [isLoading, setLoading]);
 
   useEffect(() => {
     onInitValues();
