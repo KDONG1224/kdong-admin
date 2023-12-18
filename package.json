@@ -52,7 +52,7 @@
     "start:prod": "REACT_APP_BUILD_MODE=prod pm2 reload ecosystem.config.js --name kdong-admin",
     "build": "GENERATE_SOURCEMAP=false craco build",
     "build:dev": "REACT_APP_BUILD_MODE=dev GENERATE_SOURCEMAP=false craco build",
-    "build-prod": "REACT_APP_BUILD_MODE=prod GENERATE_SOURCEMAP=false craco build"
+    "build:prod": "REACT_APP_BUILD_MODE=prod GENERATE_SOURCEMAP=false craco build"
   },
   "eslintConfig": {
     "extends": [
