@@ -1,46 +1,115 @@
 // base
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // styles
 import { StyledGuestbookList } from './style';
 
 // components
-import { PaginationTable } from 'components';
+import { LazyImage, PaginationTable } from 'components';
 import { usePagination, useTargetScroll } from 'hooks';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  GuestbookApi,
+  GuestbookImageProps,
+  GuestbookListProps,
+  QUERY_GUESTBOOK_LISTS,
+  QUERY_GUESTBOOK_UPDATE,
+  UpdateExposeGuestbookProps
+} from 'modules/guestbook';
+import { Switch } from 'antd';
+import dayjs from 'dayjs';
 
 export const GuestbookList = () => {
   const [guestbookLists, setGuestbookLists] = useState<any[]>([]);
   const [totalElement, setTotalElement] = useState(0);
 
+  const queryClient = useQueryClient();
+
   const { scrollY } = useTargetScroll({
-    y: 0
+    y: 400
   });
 
   const { pagination, onChangePageSize } = usePagination({
     totalElement: totalElement
   });
 
+  const guestbookApi = useMemo(() => {
+    return new GuestbookApi();
+  }, []);
+
+  const { data: resultLists, isFetching } = useQuery(
+    [QUERY_GUESTBOOK_LISTS, pagination.current],
+    async () => {
+      const query = {
+        take: 20,
+        page: pagination.current + 1
+      };
+
+      return await guestbookApi.getGuestbookList(query);
+    },
+    {
+      select: (data) => {
+        return data.result;
+      }
+    }
+  );
+
+  const { mutateAsync: changeExpose } = useMutation(
+    [QUERY_GUESTBOOK_UPDATE],
+    async (data: UpdateExposeGuestbookProps) => {
+      return await guestbookApi.updateGuestbookExpose(data);
+    },
+    {
+      onSettled: () => {
+        setGuestbookLists([]);
+        setTotalElement(0);
+        return queryClient.invalidateQueries([QUERY_GUESTBOOK_LISTS]);
+      }
+    }
+  );
+
+  const onChangeExpose = useCallback(
+    (record: GuestbookListProps) => {
+      changeExpose({ id: record.id, expose: !record.expose });
+    },
+    [changeExpose]
+  );
+
   const columns = useMemo(
     () => [
-      { key: 'username', dataIndex: 'username', title: '이름' },
+      { key: 'guestName', dataIndex: 'guestName', title: '게스트 이름' },
       {
-        key: 'phoneNumber',
-        dataIndex: 'phoneNumber',
-        title: '휴대전화'
+        key: 'guestbookFiles',
+        dataIndex: 'guestbookFiles',
+        title: '썸네일',
+        render: (texts: GuestbookImageProps[]) =>
+          texts && texts.length > 0 ? (
+            <LazyImage
+              src={texts[0].location}
+              width="100%"
+              height={100}
+              style={{ objectFit: 'contain', background: '#f5f5f5' }}
+            />
+          ) : (
+            '없음'
+          )
       },
       {
-        key: 'birthday',
-        dataIndex: 'birthday',
-        title: '생년월일'
+        key: 'createdAt',
+        dataIndex: 'createdAt',
+        title: '생성일',
+        render: (text: string) => dayjs(text).format('YYYY-MM-DD')
       },
-      { key: 'role', dataIndex: 'role', title: '권환' },
       {
-        key: 'status',
-        dataIndex: 'status',
-        title: '활동유무'
+        key: 'expose',
+        dataIndex: 'expose',
+        title: '노출여부',
+        render: (text: boolean, record: GuestbookListProps) => (
+          <Switch checked={text} onChange={() => onChangeExpose(record)} />
+        )
       }
     ],
-    []
+    [onChangeExpose]
   );
 
   const dataSource = useMemo(() => {
@@ -48,6 +117,17 @@ export const GuestbookList = () => {
 
     return guestbookLists;
   }, [guestbookLists]);
+
+  const onInitValue = useCallback(() => {
+    if (!resultLists) return;
+
+    setGuestbookLists((prev) => [...prev, ...resultLists.guestbooks]);
+    setTotalElement(resultLists.totalElements);
+  }, [resultLists]);
+
+  useEffect(() => {
+    onInitValue();
+  }, [onInitValue]);
 
   return (
     <StyledGuestbookList>
@@ -59,11 +139,12 @@ export const GuestbookList = () => {
             pagination={{
               ...pagination,
               current:
-                totalElement === dataSource.length ? 1 : pagination.current
+                totalElement === dataSource.length ? 1 : pagination.current + 1
             }}
             onChangePageSize={onChangePageSize}
             scroll={{ y: scrollY }}
             showRowSelection={false}
+            isLoading={isFetching}
           />
         </div>
       </div>

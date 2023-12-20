@@ -79,11 +79,13 @@ export const StyledBasicTextEditor = styled.div<StyledBasicTextEditorProps>`
       > ul {
         font-size: 1.2em;
         line-height: 1.4;
+        list-style: inside;
 
         > li {
-          font-size: 1.2em;
-          line-height: 1.4;
-          list-style-type: disc;
+          text-indent: 0.4em;
+          ::marker {
+            margin: 0 !important;
+          }
         }
       }
 
