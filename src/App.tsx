@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import { useRecoilValue } from 'recoil';
 import { loadingState } from 'modules/ui';
 import { message } from 'antd';
+import { ResponseUserInfo } from 'modules';
 
 const StyledApp = styled.div`
   height: 100vh;
@@ -34,9 +35,9 @@ const App = () => {
     rtl: true
   });
 
-  const checkUser = (user: any) => {
+  const checkUser = (user: ResponseUserInfo) => {
     const arr = ['ADMIN', 'CLIENT', 'USER'];
-    const checkArr = arr.every((item) => user?.accountType === item);
+    const checkArr = arr.every((item) => user?.role === item);
 
     return !checkArr;
   };

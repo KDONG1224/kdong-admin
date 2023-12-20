@@ -1,3 +1,5 @@
+export type UserRole = 'ADMIN' | 'CLIENT' | 'USER';
+
 export interface RequestSignIn {
   userid: string;
   password: string;
@@ -9,10 +11,10 @@ export interface ResponseUserInfo {
   username: string;
   email: string;
   phoneNumber: string;
-  birth: string;
+  birthday: string;
   createdAt: string;
   updatedAt: string;
-  role: 'ADMIN' | 'USER';
+  role: UserRole;
   status: boolean;
 }
 
@@ -21,9 +23,3 @@ export interface ResponseSignIn {
   REFRESH_TOKEN: string;
   userInfo: ResponseUserInfo;
 }
-
-export interface RequestSignUp
-  extends Omit<
-    ResponseUserInfo,
-    'createdAt' | 'updatedAt' | 'role' | 'status'
-  > {}

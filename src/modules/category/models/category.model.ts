@@ -26,7 +26,7 @@ export interface CategoryListsProps {
 
 export interface ResponseMainCategoryLists extends BaseResponseProps {
   result: {
-    mainCategories: CategoryListsProps[];
+    categories: CategoryListsProps[];
   };
 }
 
@@ -34,4 +34,15 @@ export interface ResponseSubCategoryLists extends BaseResponseProps {
   result: {
     subCategories: CategoryListsProps[];
   };
+}
+
+export interface ResponseCreateCategory extends BaseResponseProps {
+  result: {
+    category: CategoryListsProps;
+  };
+}
+
+export interface UpdateDataCategoryProps {
+  id: string;
+  data: UpdateCategoryProps;
 }

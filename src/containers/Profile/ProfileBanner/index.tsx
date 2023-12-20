@@ -114,7 +114,7 @@ export const ProfileBanner = () => {
       const ids = bannerImages.map((item) => item.id);
 
       const res = await Promise.all(
-        bannerImages.map(async (item: any, idx: number) => {
+        bannerImages.map(async (item) => {
           const file = await uploadApi.getS3Object(
             item.location,
             item.originalname,

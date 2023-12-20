@@ -19,11 +19,13 @@ import { Switch } from 'antd';
 import {
   QUERY_GET_ALL_WANTED,
   QUERY_SEND_MAILER,
+  ResponseWantedProps,
   SendMailerProps,
   WantedApi,
   WantedListsProps
 } from 'modules/wanted';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 
 export const UserEmail = () => {
   const [isWantedLists, setIsWantedLists] = useState<WantedListsProps[]>([]);
@@ -41,14 +43,18 @@ export const UserEmail = () => {
     return new WantedApi();
   }, []);
 
-  const { data: result, isFetching } = useQuery(
+  const { data: result, isFetching } = useQuery<
+    ResponseWantedProps,
+    AxiosError,
+    WantedListsProps[]
+  >(
     [QUERY_GET_ALL_WANTED],
     async () => {
       return await wantedApi.getAllWanted();
     },
     {
       select: (data) => {
-        return data.result;
+        return data.result.wantedLists;
       }
     }
   );
@@ -89,7 +95,9 @@ export const UserEmail = () => {
         key: 'isSend',
         dataIndex: 'isSend',
         title: '발송여부',
-        render: (text: boolean, record: any) => <Switch checked={text} />
+        render: (text: boolean, record: WantedListsProps) => (
+          <Switch checked={text} />
+        )
       }
     ],
     []
@@ -116,8 +124,8 @@ export const UserEmail = () => {
   useEffect(() => {
     if (!result) return;
 
-    setTotalElement(result.wantedLists.length);
-    setIsWantedLists(result.wantedLists);
+    setTotalElement(result.length);
+    setIsWantedLists(result);
   }, [result]);
 
   console.log('=== selectedRowKeys == : ', selectedRowKeys);

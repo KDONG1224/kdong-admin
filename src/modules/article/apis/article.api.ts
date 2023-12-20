@@ -21,8 +21,8 @@ export class ArticleApi {
     ).then((res) => res.data);
   }
 
-  async createArticle(data: any) {
-    return await this.Axios.post<any>('/posts', data, {
+  async createArticle(data: FormData) {
+    return await this.Axios.post('/posts', data, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -33,7 +33,7 @@ export class ArticleApi {
     return await this.Axios.get(`/posts/${id}`).then((res) => res.data);
   }
 
-  async updateArticleById(id: string, data: any) {
+  async updateArticleById(id: string, data: FormData) {
     return await this.Axios.patch(`/posts/${id}`, data, {
       headers: {
         'Content-Type': 'multipart/form-data'

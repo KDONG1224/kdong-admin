@@ -1,8 +1,5 @@
-interface BaseResponseProps {
-  code: number;
-  isSuccess: boolean;
-  message: string | string[];
-}
+import { BaseResponseProps } from 'modules/common';
+import { UserRole } from 'modules/user';
 
 export interface ArticleDetailStateProps {
   articleId: string;
@@ -12,6 +9,13 @@ export interface ArticleTagsProps {
   id: string;
   name: string;
   sequence: number;
+}
+
+export interface ArticleCategoryProps {
+  id: string;
+  catergoryName: string;
+  catergoryNumber: number;
+  subCatergoryNumber: number;
 }
 
 export interface ArticleThumbnaiProps {
@@ -34,16 +38,11 @@ export interface ArticleThumbnaiProps {
 export interface ArticleListsProps {
   id: string;
   author: {
-    role: 'ADMIN' | 'CLIENT' | 'USER';
+    role: UserRole;
     username: string;
     email: string;
   };
-  category?: {
-    id: string;
-    catergotyName: string;
-    catergotyNumber: number;
-    subCatergotyNumber: number;
-  };
+  category: ArticleCategoryProps;
   title: string;
   content: string;
   expose: boolean;

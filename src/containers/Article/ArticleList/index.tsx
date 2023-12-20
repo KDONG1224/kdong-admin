@@ -17,11 +17,13 @@ import { usePagination, useTargetScroll } from 'hooks';
 // modules
 import {
   ArticleApi,
+  ArticleCategoryProps,
   ArticleListsProps,
   ArticleThumbnaiProps,
   QUERY_EXPOSE_ARTICLE,
   QUERY_GET_ALL_ARTICLES,
-  ResponseArticleLists
+  ResponseArticleLists,
+  ResponseArticleResultProps
 } from 'modules/article';
 
 // routs
@@ -57,7 +59,7 @@ export const ArticleList = () => {
   const { data: articles, isFetching } = useQuery<
     ResponseArticleLists,
     AxiosError,
-    AdditionalProps
+    ResponseArticleResultProps
   >(
     [QUERY_GET_ALL_ARTICLES, history, isSearch],
     async ({ queryKey }) => {
@@ -136,7 +138,7 @@ export const ArticleList = () => {
         key: 'category',
         dataIndex: 'category',
         title: '카테고리',
-        render: (text: any) => (text ? text.categoryName : '')
+        render: (text: ArticleCategoryProps) => (text ? text.catergoryName : '')
       },
       { key: 'readCount', dataIndex: 'readCount', title: '조회수' },
       { key: 'likeCount', dataIndex: 'likeCount', title: '좋아요' },
@@ -194,7 +196,7 @@ export const ArticleList = () => {
         key: 'edit',
         dataIndex: 'edit',
         title: '수정',
-        render: (text: any, record) => (
+        render: (_, record) => (
           <BasicButton
             btnText="수정"
             onClick={() => onChangeArticleEdit(record)}

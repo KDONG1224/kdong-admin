@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { StyledSignUp } from './style';
 import { DatePicker, Form, Input, message } from 'antd';
+import { AuthApi, ResponseSignUp, RequestSignUp } from 'modules/auth';
 import {
   UserOutlined,
   LockOutlined,
@@ -16,7 +17,8 @@ import { useHistory } from 'react-router';
 import { ROUTE_SIGN_UP } from 'routes/const';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AuthApi } from 'modules/auth';
+import { AxiosError } from 'axios';
+import dayjs from 'dayjs';
 
 export const SignUp = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -33,9 +35,9 @@ export const SignUp = () => {
     setPasswordVisible((prev) => !prev);
   };
 
-  const { mutateAsync } = useMutation(
+  const { mutateAsync } = useMutation<ResponseSignUp, AxiosError, any>(
     ['QUERY_SIGN_UP'],
-    async (data: any) => await authApi.userSignUp(data),
+    async (data: RequestSignUp) => await authApi.userSignUp(data),
     {
       onSuccess: (data) => {
         message.success('회원가입에 성공하였습니다.');
@@ -51,26 +53,26 @@ export const SignUp = () => {
         return { previousData };
       },
 
-      onError: (data, values, context) => {
-        if (context?.previousData) {
-          queryClient.setQueryData(['QUERY_SIGN_UP'], context.previousData);
-        }
+      // onError: (data, values, context) => {
+      //   if (context?.previousData) {
+      //     queryClient.setQueryData(['QUERY_SIGN_UP'], context.previousData);
+      //   }
 
-        return;
-      },
+      //   return;
+      // },
       onSettled: () => {
         return queryClient.invalidateQueries(['QUERY_SIGN_UP']);
       }
     }
   );
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: RequestSignUp) => {
     try {
       const { birthday, ...rest } = values;
 
       const result = {
         ...rest,
-        birthday: birthday.format('YYYYMMDD')
+        birthday: dayjs(birthday).format('YYYYMMDD')
       };
 
       await mutateAsync(result);

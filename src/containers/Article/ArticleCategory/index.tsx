@@ -11,12 +11,20 @@ import { BasicButton, CategoryEditModal } from 'components';
 import {
   QUERY_CREATE_CATEGORY,
   QUERY_GET_MAIN_CATEGORYS,
-  QUERY_GET_SUB_CATEGORY,
   QUERY_UPDATE_CATEGORY
 } from 'modules/category/queries/category.query';
-import { CategoryApi } from 'modules/category';
+import {
+  CategoryApi,
+  CategoryListsProps,
+  CreateCategoryProps,
+  ResponseCreateCategory,
+  ResponseMainCategoryLists,
+  ResponseSubCategoryLists,
+  UpdateCategoryProps
+} from 'modules/category';
 
 // libraries
+import { AxiosError } from 'axios';
 import { Table, message } from 'antd';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
@@ -65,7 +73,7 @@ export const ArticleCategory = () => {
             }}
           />
         ),
-        render: (text: any, record: any) => {
+        render: (_: string, record: CategoryListsProps) => {
           return (
             <div
               style={{
@@ -74,7 +82,6 @@ export const ArticleCategory = () => {
                 gap: '0.8rem'
               }}
             >
-              {/* <BasicButton btnText="삭제" /> */}
               <BasicButton
                 btnText="수정"
                 onClick={() => {
@@ -91,8 +98,11 @@ export const ArticleCategory = () => {
     ];
   }, []);
 
-  const { mutateAsync: getSubCategory } = useMutation(
-    [QUERY_GET_SUB_CATEGORY, selectedRowKeys, isCategoryEditModalOpen],
+  const { mutateAsync: getSubCategory } = useMutation<
+    ResponseSubCategoryLists,
+    AxiosError,
+    string
+  >(
     async (id: string) => {
       return await categoryApi.getSubCategories(id);
     },
@@ -101,7 +111,7 @@ export const ArticleCategory = () => {
         if (!data) return;
 
         const sortedData = data.result.subCategories.sort(
-          (a: any, b: any) => a.subCategoryNumber - b.subCategoryNumber
+          (a, b) => a.subCategoryNumber - b.subCategoryNumber
         );
 
         setSubCategories(sortedData);
@@ -112,7 +122,11 @@ export const ArticleCategory = () => {
     }
   );
 
-  const { data: mainCategories } = useQuery(
+  const { data: mainCategories } = useQuery<
+    ResponseMainCategoryLists,
+    AxiosError,
+    CategoryListsProps[]
+  >(
     [QUERY_GET_MAIN_CATEGORYS],
     async () => {
       return await categoryApi.getMainCategories();
@@ -120,7 +134,7 @@ export const ArticleCategory = () => {
     {
       select: (data) => data.result.categories,
       onSuccess: async (data) => {
-        if (!data) return;
+        if (!data || data.length === 0) return;
 
         setSelectedRowKeys([data[0].id]);
         await getSubCategory(data[0].id);
@@ -128,9 +142,13 @@ export const ArticleCategory = () => {
     }
   );
 
-  const { mutateAsync: createSubCategory } = useMutation(
+  const { mutateAsync: createSubCategory } = useMutation<
+    ResponseCreateCategory,
+    AxiosError,
+    CreateCategoryProps
+  >(
     [QUERY_CREATE_CATEGORY, selectedRowKeys, isCategoryEditModalOpen],
-    async (data: any) => {
+    async (data: CreateCategoryProps) => {
       return await categoryApi.createCategory(data);
     },
     {
@@ -138,7 +156,7 @@ export const ArticleCategory = () => {
         if (!data) return;
 
         const findMainCategory = mainCategories?.find(
-          (m: any) => m.id === selectedRowKeys[0]
+          (m) => m.id === selectedRowKeys[0]
         );
 
         if (findMainCategory) {
@@ -152,9 +170,13 @@ export const ArticleCategory = () => {
     }
   );
 
-  const { mutateAsync: updateCategory } = useMutation(
+  const { mutateAsync: updateCategory } = useMutation<
+    ResponseCreateCategory,
+    AxiosError,
+    { id: string; data: UpdateCategoryProps }
+  >(
     [QUERY_UPDATE_CATEGORY],
-    async (datas: any) => {
+    async (datas: { id: string; data: UpdateCategoryProps }) => {
       const { id, data } = datas;
 
       return await categoryApi.updateCategory(id, data);
@@ -164,7 +186,7 @@ export const ArticleCategory = () => {
         if (!data) return;
 
         const findMainCategory = mainCategories?.find(
-          (m: any) => m.id === selectedRowKeys[0]
+          (m) => m.id === selectedRowKeys[0]
         );
 
         if (findMainCategory) {
@@ -183,7 +205,7 @@ export const ArticleCategory = () => {
     setIsCategoryEditModalOpen((prev) => !prev);
   };
 
-  const onMainRowClick = (record: any) => {
+  const onMainRowClick = (record: CategoryListsProps) => {
     return {
       onClick: async () => {
         try {
@@ -221,7 +243,9 @@ export const ArticleCategory = () => {
       await updateCategory({
         id: isSelectRow.id as string,
         data: {
-          categoryName: isActiveValue
+          categoryName: isActiveValue,
+          categoryNumber: isSelectRow.categoryNumber,
+          subCategoryNumber: isSelectRow.subCategoryNumber
         }
       });
     } catch (e: any) {

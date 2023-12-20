@@ -1,3 +1,6 @@
+import { BaseResponseProps } from 'modules/common';
+import { UserRole } from 'modules/user';
+
 export interface UserAccount {
   userid: string;
   password: string;
@@ -9,7 +12,7 @@ export interface UserInfoProps {
   birthday: string;
   email: string;
   phoneNumber: string;
-  role: 'ADMIN' | 'USER';
+  role: UserRole;
   status: boolean;
   createdAt: string;
   updatedAt: string;
@@ -25,4 +28,17 @@ export interface ForgotPasswordProps {
   email: string;
   password: string;
   phoneNumber: string;
+}
+
+export interface RequestSignUp {
+  userid: string;
+  password: string;
+  username: string;
+  email: string;
+  phoneNumber: string;
+  birthday: string;
+}
+
+export interface ResponseSignUp extends BaseResponseProps {
+  result: UserInfoProps;
 }
