@@ -1,11 +1,11 @@
 // base
-import React from 'react';
+import React, { useMemo } from 'react';
 
 // styles
 import { StyledBasicTextEditor } from './style';
 
 // modules
-import { QUERY_POST_UPLOAD_FILE, uploadApi } from 'modules/upload';
+import { QUERY_POST_UPLOAD_FILE, UploadApi } from 'modules/upload';
 
 // hooks
 import { useTargetScroll } from 'hooks';
@@ -29,6 +29,10 @@ export const BasicTextEditor: React.FC<BasicTextEditorProps> = ({
   const queryClient = useQueryClient();
 
   const { scrollY } = useTargetScroll({ y: 500, target: '.main-wrapper' });
+
+  const uploadApi = useMemo(() => {
+    return new UploadApi();
+  }, []);
 
   const { mutateAsync } = useMutation(
     async (data: FormData) => await uploadApi.postUploadFile(data),

@@ -33,7 +33,7 @@ import {
   ResponseSubCategoryLists
 } from 'modules/category';
 import { AxiosError } from 'axios';
-import { uploadApi } from 'modules/upload';
+import { UploadApi } from 'modules/upload';
 import { Color } from 'antd/es/color-picker';
 import { RcFile } from 'antd/es/upload';
 import { useSetRecoilState } from 'recoil';
@@ -75,6 +75,10 @@ export const ArticleDetail = () => {
 
   const categoryApi = useMemo(() => {
     return new CategoryApi();
+  }, []);
+
+  const uploadApi = useMemo(() => {
+    return new UploadApi();
   }, []);
 
   const { data: articleDetail, isFetching } = useQuery(
@@ -154,8 +158,6 @@ export const ArticleDetail = () => {
     }
   );
 
-  console.log('== isLoading == : ', isLoading);
-
   const onInitValues = useCallback(async () => {
     try {
       if (!articleDetail) return;
@@ -165,24 +167,22 @@ export const ArticleDetail = () => {
 
       const thumbIds = thumbnails.map((item: any) => item.id);
       const tagIds = tags.map((item: any) => item.id);
-      const tagsArr = tags.length > 0 ? tags.map((tag: any) => tag.tag) : [];
+      const tagsArr = tags.length > 0 ? tags.map((tag: any) => tag.name) : [];
 
       const res = await Promise.all(
         thumbnails.map(async (item: any, idx: number) => {
-          const file = await uploadApi.getS3Object(
-            item.location,
-            item.originalname,
-            item.mimetype
+          const fileKey = item.location.replace(
+            'https://kdong.s3.amazonaws.com/dev/',
+            ''
           );
+          const file = await uploadApi.getFileObject(fileKey);
 
-          if (!file) {
-            return {
-              ...item
-            };
-          }
+          const object = new File([file], item.originalname, {
+            type: item.mimetype
+          });
 
           return {
-            file,
+            object,
             ...item
           };
         })
@@ -192,7 +192,7 @@ export const ArticleDetail = () => {
         if (!articleDetail) return;
 
         const category = categories.find(
-          (r) => r && r.id === articleDetail.category.id
+          (r) => r && r.id === articleDetail.category?.id
         );
 
         setCategory(category ? category : null);
@@ -210,7 +210,7 @@ export const ArticleDetail = () => {
     } catch (error) {
       console.log(error);
     }
-  }, [articleDetail, categories]);
+  }, [articleDetail, categories, uploadApi]);
 
   const onChangeTitle = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTitle(e.target.value);

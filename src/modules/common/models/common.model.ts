@@ -3,3 +3,7 @@ export interface BaseResponseProps {
   isSuccess: boolean;
   message: string | string[];
 }
+
+export interface AdditionalProps {
+  [key: string]: any;
+}

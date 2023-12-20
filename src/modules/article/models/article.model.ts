@@ -11,6 +11,7 @@ export interface ArticleDetailStateProps {
 export interface ArticleTagsProps {
   id: string;
   name: string;
+  sequence: number;
 }
 
 export interface ArticleThumbnaiProps {
@@ -37,7 +38,7 @@ export interface ArticleListsProps {
     username: string;
     email: string;
   };
-  catergoty?: {
+  category?: {
     id: string;
     catergotyName: string;
     catergotyNumber: number;
@@ -58,10 +59,16 @@ export interface ArticleListsProps {
   thumbnails: ArticleThumbnaiProps[];
 }
 
+export interface ResponseArticleResultProps {
+  articles: ArticleListsProps[];
+  currentTotal: number;
+  total: number;
+}
+
 export interface ResponseArticleLists extends BaseResponseProps {
-  result: {
-    articles: ArticleListsProps[];
-    currentTotal: number;
-    total: number;
-  };
+  result: ResponseArticleResultProps;
+}
+
+export interface ResponseArticleDetail extends BaseResponseProps {
+  result: ArticleListsProps;
 }
