@@ -13,39 +13,30 @@ import {
   ThumbnailModal
 } from 'components';
 
-// libraries
-import { ColorPicker, Input, Select, message } from 'antd';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+// modules
 import {
   ArticleApi,
   QUERY_CREATE_ARTICLE,
-  QUERY_GET_ARTICLE_BY_ID
-} from 'modules/article';
-import { UploadFile } from 'antd/lib';
-import {
+  QUERY_GET_ARTICLE_BY_ID,
   ArticleDetailStateProps,
   ArticleThumbnaiProps
-} from 'modules/article/models/article.model';
+} from 'modules/article';
 import {
   CategoryApi,
   CategoryListsProps,
   QUERY_GET_SUB_CATEGORY,
   ResponseSubCategoryLists
 } from 'modules/category';
-import { AxiosError } from 'axios';
 import { UploadApi } from 'modules/upload';
-import { Color } from 'antd/es/color-picker';
-import { RcFile } from 'antd/es/upload';
-import { useSetRecoilState } from 'recoil';
 import { loadingState } from 'modules/ui';
+import { PRcFile } from 'modules';
 
-export interface PRcFile extends RcFile {
-  sequence: number;
-  originalname: string;
-  mimetype: string;
-  location: string;
-  id: string | null;
-}
+// libraries
+import { AxiosError } from 'axios';
+import { useSetRecoilState } from 'recoil';
+import { Color } from 'antd/es/color-picker';
+import { ColorPicker, Input, Select, message } from 'antd';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export const ArticleDetail = () => {
   const [isEdit, setIsEdit] = useState(false);
@@ -55,13 +46,13 @@ export const ArticleDetail = () => {
   const [category, setCategory] = useState<CategoryListsProps | null>(null);
   const [tags, setTags] = useState<string[]>(['KDONG']);
   const [isThumbModal, setIsThumbModal] = useState(false);
-  const [thumbnailLists, setThumbnailLists] = useState<
-    ArticleThumbnaiProps[] | PRcFile[]
-  >([]);
   const [mainColor, setMainColor] = useState<string>('#000000');
   const [subColor, setSubColor] = useState<string>('#f43f00');
   const [hasThumbIds, setHasThumbIds] = useState<string[]>([]);
   const [hasTagIds, setHasTagIds] = useState<string[]>([]);
+  const [thumbnailLists, setThumbnailLists] = useState<
+    ArticleThumbnaiProps[] | PRcFile[]
+  >([]);
 
   const setLoading = useSetRecoilState(loadingState);
 
@@ -228,11 +219,11 @@ export const ArticleDetail = () => {
     setTags(values);
   };
 
-  const onChangeMainColor = (color: any) => {
+  const onChangeMainColor = (color: string) => {
     setMainColor(color);
   };
 
-  const onChangeSubColor = (color: any) => {
+  const onChangeSubColor = (color: string) => {
     setSubColor(color);
   };
 

@@ -13,9 +13,9 @@ export interface ArticleTagsProps {
 
 export interface ArticleCategoryProps {
   id: string;
-  catergoryName: string;
-  catergoryNumber: number;
-  subCatergoryNumber: number;
+  categoryName: string;
+  categoryNumber: number;
+  subCategoryNumber: number;
 }
 
 export interface ArticleThumbnaiProps {

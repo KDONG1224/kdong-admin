@@ -49,7 +49,8 @@ export const StyledBasicTextEditor = styled.div<StyledBasicTextEditorProps>`
       h1,
       h2,
       h3,
-      h4 {
+      h4,
+      h5 {
         font-weight: normal;
         letter-spacing: -1px;
         color: #000;
@@ -69,6 +70,11 @@ export const StyledBasicTextEditor = styled.div<StyledBasicTextEditorProps>`
       > h4 {
         font-size: 2.25em;
         line-height: 1.55;
+      }
+
+      > h5 {
+        font-size: 1.87em;
+        line-height: 1.65;
       }
 
       > p {

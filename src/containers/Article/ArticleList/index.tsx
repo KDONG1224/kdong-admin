@@ -138,7 +138,7 @@ export const ArticleList = () => {
         key: 'category',
         dataIndex: 'category',
         title: '카테고리',
-        render: (text: ArticleCategoryProps) => (text ? text.catergoryName : '')
+        render: (text: ArticleCategoryProps) => (text ? text.categoryName : '')
       },
       { key: 'readCount', dataIndex: 'readCount', title: '조회수' },
       { key: 'likeCount', dataIndex: 'likeCount', title: '좋아요' },

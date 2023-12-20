@@ -7,12 +7,14 @@ import { StyledThumbnailModal } from './style';
 // components
 import { BasicButton, DragSortTable, LazyImage } from 'components';
 
+// modules
+import { PRcFile } from 'modules';
+import { ArticleThumbnaiProps } from 'modules/article';
+
 // libraries
 import { ModalProps, Upload } from 'antd';
 import { RcFile } from 'antd/es/upload';
 import type { DragEndEvent } from '@dnd-kit/core';
-import { PRcFile } from 'containers';
-import { ArticleThumbnaiProps } from 'modules/article';
 
 interface ThumbnailModalProps extends ModalProps {
   modalTitle?: string;

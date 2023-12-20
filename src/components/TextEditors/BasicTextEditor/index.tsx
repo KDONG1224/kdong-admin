@@ -198,6 +198,12 @@ export const BasicTextEditor: React.FC<BasicTextEditorProps> = ({
                 class: 'ck-heading_heading3'
               },
               {
+                model: 'heading4',
+                view: 'h5',
+                title: 'Heading 4',
+                class: 'ck-heading_heading4'
+              },
+              {
                 model: 'paragraph',
                 title: 'Paragraph',
                 class: 'ck-heading_paragraph'

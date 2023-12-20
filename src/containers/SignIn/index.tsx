@@ -1,12 +1,12 @@
 // base
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router';
 
 // style
 import { StyledSignIn } from './style';
 
 // components
-import { BasicButton, PasswordModal } from 'components';
+import { BasicButton } from 'components';
 
 // modules
 import { RequestSignIn } from 'modules';
@@ -19,6 +19,7 @@ import {
   COOKIE_SAVE_ID,
   cookieStorage
 } from 'services/cookie';
+
 // routes
 import { ROUTE_ROOT, ROUTE_SIGN_UP } from 'routes/const';
 
@@ -37,7 +38,7 @@ import {
 export const SignIn = () => {
   const [isSaveId, setIsSaveId] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  // const [isForgotPassword, setIsForgotPassword] = useState(false);
 
   const setUserInfo = useSetRecoilState(userLoginState);
 
@@ -59,9 +60,9 @@ export const SignIn = () => {
     form.setFieldValue('save', checked);
   };
 
-  const onVisibleForgotPassword = () => {
-    setIsForgotPassword((prev) => !prev);
-  };
+  // const onVisibleForgotPassword = () => {
+  //   setIsForgotPassword((prev) => !prev);
+  // };
 
   const onSubmit = async (data: RequestSignIn) => {
     try {
@@ -72,9 +73,9 @@ export const SignIn = () => {
       cookieStorage.setCookie(COOKIE_REFRESH_TOKEN, res.result.refreshToken);
 
       if (save) {
-        cookieStorage.setCookie(COOKIE_SAVE_ID, userid);
+        sessionStorage.setItem(COOKIE_SAVE_ID, userid);
       } else {
-        cookieStorage.removeCookie(COOKIE_SAVE_ID);
+        sessionStorage.removeItem(COOKIE_SAVE_ID);
       }
 
       setUserInfo({ userInfo: res.result.userInfo, isLogin: true });
@@ -88,6 +89,15 @@ export const SignIn = () => {
   const onSignUp = () => {
     hisyory.push(ROUTE_SIGN_UP);
   };
+
+  useEffect(() => {
+    const saveId = sessionStorage.getItem(COOKIE_SAVE_ID);
+
+    if (saveId) {
+      setIsSaveId(true);
+      form.setFieldValue('userid', saveId);
+    }
+  }, [form]);
 
   return (
     <>
@@ -215,12 +225,12 @@ export const SignIn = () => {
                     </Form.Item>
                   </div>
                   <div className="signin-wrapper-body-bottom-form-forgot-right">
-                    <div
+                    {/* <div
                       className="signin-wrapper-body-bottom-form-forgot-right-text"
                       onClick={onVisibleForgotPassword}
                     >
                       Forgot Password?
-                    </div>
+                    </div> */}
                   </div>
                 </div>
 
@@ -242,7 +252,7 @@ export const SignIn = () => {
       </StyledSignIn>
 
       {/* 비밀번호 찾기 */}
-      <PasswordModal
+      {/* <PasswordModal
         open={isForgotPassword}
         onClose={onChangePasswordVisible}
         onSubmit={(values) => console.log(values)}
@@ -252,7 +262,7 @@ export const SignIn = () => {
         cancelButtonProps={{
           onClick: onChangePasswordVisible
         }}
-      />
+      /> */}
     </>
   );
 };

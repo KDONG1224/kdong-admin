@@ -1,7 +1,20 @@
+// base
 import { useMemo, useState } from 'react';
+import { useHistory } from 'react-router';
+
+// styles
 import { StyledSignUp } from './style';
-import { DatePicker, Form, Input, message } from 'antd';
+
+// components
+import { BasicButton } from 'components';
+
+// modules
 import { AuthApi, ResponseSignUp, RequestSignUp } from 'modules/auth';
+
+// routes
+import { ROUTE_SIGN_IN } from 'routes/const';
+
+// libraries
 import {
   UserOutlined,
   LockOutlined,
@@ -11,14 +24,11 @@ import {
   SmileOutlined,
   PhoneOutlined
 } from '@ant-design/icons';
-import { BasicButton } from 'components';
-import { useForm } from 'antd/es/form/Form';
-import { useHistory } from 'react-router';
-import { ROUTE_SIGN_UP } from 'routes/const';
-
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
 import dayjs from 'dayjs';
+import { AxiosError } from 'axios';
+import { useForm } from 'antd/es/form/Form';
+import { DatePicker, Form, Input, message } from 'antd';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export const SignUp = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -31,10 +41,6 @@ export const SignUp = () => {
     return new AuthApi();
   }, []);
 
-  const onChangePasswordVisible = () => {
-    setPasswordVisible((prev) => !prev);
-  };
-
   const { mutateAsync } = useMutation<ResponseSignUp, AxiosError, any>(
     ['QUERY_SIGN_UP'],
     async (data: RequestSignUp) => await authApi.userSignUp(data),
@@ -42,7 +48,7 @@ export const SignUp = () => {
       onSuccess: (data) => {
         message.success('회원가입에 성공하였습니다.');
 
-        hisyory.push(ROUTE_SIGN_UP);
+        hisyory.push(ROUTE_SIGN_IN);
 
         return queryClient.invalidateQueries(['QUERY_SIGN_UP']);
       },
@@ -66,6 +72,14 @@ export const SignUp = () => {
     }
   );
 
+  const onChangePasswordVisible = () => {
+    setPasswordVisible((prev) => !prev);
+  };
+
+  const onSignIn = () => {
+    hisyory.push(ROUTE_SIGN_IN);
+  };
+
   const onSubmit = async (values: RequestSignUp) => {
     try {
       const { birthday, ...rest } = values;
@@ -79,10 +93,6 @@ export const SignUp = () => {
     } catch (e: any) {
       message.error(e.message[0] || e.message);
     }
-  };
-
-  const onSignIn = () => {
-    hisyory.push(ROUTE_SIGN_UP);
   };
 
   return (
