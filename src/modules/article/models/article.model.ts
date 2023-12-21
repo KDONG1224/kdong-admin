@@ -71,3 +71,13 @@ export interface ResponseArticleLists extends BaseResponseProps {
 export interface ResponseArticleDetail extends BaseResponseProps {
   result: ArticleListsProps;
 }
+
+export interface ResponseArticleDetailResultProps {
+  currentPost: ArticleListsProps;
+  prevPost?: ArticleListsProps;
+  nextPost?: ArticleListsProps;
+}
+
+export interface ResponseArticleDetailProps extends BaseResponseProps {
+  result: ResponseArticleDetailResultProps;
+}

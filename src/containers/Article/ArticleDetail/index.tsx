@@ -72,7 +72,7 @@ export const ArticleDetail = () => {
     return new UploadApi();
   }, []);
 
-  const { data: articleDetail, isFetching } = useQuery(
+  const { data: resultLists, isFetching } = useQuery(
     [QUERY_GET_ARTICLE_BY_ID, isEdit],
     async () => {
       if (!locationState || !isEdit) return null;
@@ -151,10 +151,10 @@ export const ArticleDetail = () => {
 
   const onInitValues = useCallback(async () => {
     try {
-      if (!articleDetail) return;
+      if (!resultLists) return;
 
       const { title, content, tags, thumbnails, mainColor, subColor } =
-        articleDetail;
+        resultLists.currentPost;
 
       const thumbIds = thumbnails.map((item: any) => item.id);
       const tagIds = tags.map((item: any) => item.id);
@@ -180,10 +180,10 @@ export const ArticleDetail = () => {
       );
 
       if (categories) {
-        if (!articleDetail) return;
+        if (!resultLists) return;
 
         const category = categories.find(
-          (r) => r && r.id === articleDetail.category?.id
+          (r) => r && r.id === resultLists.category?.id
         );
 
         setCategory(category ? category : null);
@@ -201,7 +201,7 @@ export const ArticleDetail = () => {
     } catch (error) {
       console.log(error);
     }
-  }, [articleDetail, categories, uploadApi]);
+  }, [resultLists, categories, uploadApi]);
 
   const onChangeTitle = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTitle(e.target.value);
