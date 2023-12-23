@@ -39,6 +39,7 @@ import { ColorPicker, Input, Select, message } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export const ArticleDetail = () => {
+  const [isRead, setIsRead] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [title, setTitle] = useState<string>('');
   const [modalTitle, setModalTitle] = useState<string>('');
@@ -231,6 +232,10 @@ export const ArticleDetail = () => {
     setIsThumbModal((prev) => !prev);
   };
 
+  const onChangeRead = () => {
+    setIsRead((prev) => !prev);
+  };
+
   const onChangeUploadFile = (info: any) => {
     const file = info.file;
     const blob = new Blob([file.originFileObj], {
@@ -399,6 +404,7 @@ export const ArticleDetail = () => {
               />
             </div>
             <div className="detail-wrapper-default-btns">
+              <BasicButton btnText="미리보기" onClick={onChangeRead} />
               <BasicButton btnText={modalTitle} onClick={onVisibleThumbModal} />
               <BasicButton
                 btnText={isEdit ? '수정' : '저장'}
@@ -415,6 +421,7 @@ export const ArticleDetail = () => {
           </div>
           <div className="detail-wrapper-body">
             <BasicTextEditor
+              isRead={isRead}
               isEdit={isEdit}
               editorData={editorData}
               onChangeEditorData={onChangeEditorData}

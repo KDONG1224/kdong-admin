@@ -1,5 +1,5 @@
 // base
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Route, Switch } from 'react-router';
 import { BrowserRouter as Router } from 'react-router-dom';
 
@@ -15,11 +15,14 @@ import { PrivateRoute } from 'routes/PrivateRoute';
 import { ROUTE_SIGN_IN, ROUTE_SIGN_UP } from 'routes/const';
 
 // libraries
+import hljs from 'highlight.js';
 import styled from 'styled-components';
 import { useRecoilValue } from 'recoil';
 import { loadingState } from 'modules/ui';
 import { message } from 'antd';
 import { ResponseUserInfo } from 'modules';
+
+import 'highlight.js/styles/github-dark.min.css';
 
 const StyledApp = styled.div`
   height: 100vh;
@@ -41,6 +44,10 @@ const App = () => {
 
     return !checkArr;
   };
+
+  useEffect(() => {
+    hljs.highlightAll();
+  }, []);
 
   return (
     <Router>
