@@ -37,7 +37,7 @@ export class UploadApi {
   }
 
   async postUploadFile(formData: FormData) {
-    return await this.Axios.post<any>('/common/upload', formData, {
+    return await this.Axios.post<any>('/posts/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
