@@ -104,6 +104,15 @@ export const ArticleDetail = () => {
       select: (data) => {
         return data.result.subCategories as CategoryListsProps[];
       },
+      onSuccess: (data) => {
+        if (!data || !resultLists || !resultLists.currentPost) return;
+
+        const category = data.find(
+          (r) => r.id === resultLists.currentPost.category.id
+        );
+
+        setCategory(category || null);
+      },
       refetchOnWindowFocus: false
     }
   );
@@ -161,48 +170,35 @@ export const ArticleDetail = () => {
       const tagIds = tags.map((item: any) => item.id);
       const tagsArr = tags.length > 0 ? tags.map((tag: any) => tag.name) : [];
 
-      const res = await Promise.all(
-        thumbnails.map(async (item: any, idx: number) => {
-          const fileKey = item.location.replace(
-            'https://kdong.s3.amazonaws.com/dev/',
-            ''
+      const thumbnaileObjects = await Promise.all(
+        thumbnails.map(async (item: ArticleThumbnaiProps) => {
+          const file = await uploadApi.getS3Object(
+            item.location,
+            item.originalname,
+            item.mimetype
           );
-          const file = await uploadApi.getFileObject(fileKey);
-
-          const object = new File([file], item.originalname, {
-            type: item.mimetype
-          });
 
           return {
-            object,
+            file,
             ...item
           };
         })
       );
 
-      if (categories) {
-        if (!resultLists) return;
-
-        const category = categories.find(
-          (r) => r && r.id === resultLists.category?.id
-        );
-
-        setCategory(category ? category : null);
-      }
-
-      setThumbnailLists(res);
+      setThumbnailLists(thumbnaileObjects);
+      setHasThumbIds(thumbIds);
 
       setTitle(title);
       setEditorData(content);
       setTags(tagsArr);
       setMainColor(mainColor);
       setSubColor(subColor);
-      setHasThumbIds(thumbIds);
+
       setHasTagIds(tagIds);
     } catch (error) {
       console.log(error);
     }
-  }, [resultLists, categories, uploadApi]);
+  }, [resultLists, uploadApi]);
 
   const onChangeTitle = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTitle(e.target.value);
@@ -258,7 +254,7 @@ export const ArticleDetail = () => {
 
   const onRemoveUploadFile = (index: Key) => {
     const images = (thumbnailLists as ArticleThumbnaiProps[]).filter(
-      (_, idx) => idx !== index
+      (item) => item.sequence !== index
     );
 
     setThumbnailLists(images);
@@ -274,7 +270,6 @@ export const ArticleDetail = () => {
 
       if (thumbnailLists.length > 0) {
         thumbnailLists.forEach((list: any) => {
-          console.log('== list == : ', list);
           if (list.originFileObj) {
             formData.append('thumbnails', list.originFileObj);
           } else {
@@ -288,13 +283,8 @@ export const ArticleDetail = () => {
       }
 
       if (isEdit) {
-        if (hasThumbIds) {
-          formData.append('hasThumbIds', hasThumbIds.join(',') as any);
-        }
-
-        if (hasTagIds) {
-          formData.append('hasTagIds', hasTagIds.join(',') as any);
-        }
+        formData.append('hasThumbIds', hasThumbIds.join(',') as any);
+        formData.append('hasTagIds', hasTagIds.join(',') as any);
       }
 
       formData.append('title', title);

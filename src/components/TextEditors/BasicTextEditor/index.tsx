@@ -75,7 +75,7 @@ export const BasicTextEditor: React.FC<BasicTextEditorProps> = ({
             formData.append('files', file);
 
             return await uploadFunction(formData).then((response: any) => ({
-              default: response.result.location
+              default: response.result.uploaded[0].location
             }));
           } catch (e: any) {
             return e.message;

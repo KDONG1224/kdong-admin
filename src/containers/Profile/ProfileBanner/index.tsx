@@ -227,6 +227,8 @@ export const ProfileBanner = () => {
 
       if (bannerThumbLists.length > 0) {
         bannerThumbLists.forEach((list: any) => {
+          console.log('== list == : ', list);
+
           if (list.originFileObj) {
             formData.append('thumbnails', list.originFileObj);
           } else {

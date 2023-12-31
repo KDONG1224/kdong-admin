@@ -129,7 +129,7 @@ export const ThumbnailModal: React.FC<ThumbnailModalProps> = ({
       footer={
         <div className="thumbnail-wrapper-footer">
           <BasicButton btnText="닫기" onClick={onCancel} />
-          <BasicButton btnText="삭제" disabled onClick={handleRemoveFile} />
+          <BasicButton btnText="삭제" onClick={handleRemoveFile} />
           <Upload
             listType="picture"
             showUploadList={false}

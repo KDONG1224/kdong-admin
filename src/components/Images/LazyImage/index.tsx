@@ -56,19 +56,17 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   return (
     <ProgressiveImage src={isImage} placeholder={placeholder}>
       {
-        (thumb, loading) => {
-          return (
-            <img
-              className={`image${loading ? ' loading' : ' loaded'}`}
-              src={thumb}
-              alt={alt}
-              width={width}
-              height={height}
-              style={{ borderRadius: isCircle ? '50%' : '0' }}
-              {...props}
-            />
-          );
-        }
+        (thumb, loading) => (
+          <img
+            className={`image${loading ? ' loading' : ' loaded'}`}
+            src={thumb}
+            alt={alt}
+            width={width}
+            height={height}
+            style={{ borderRadius: isCircle ? '50%' : '0' }}
+            {...props}
+          />
+        )
         // isUserFileId ? (
         //   <img
         //     className={`image${loading ? ' loading' : ' loaded'}`}
