@@ -19,15 +19,15 @@ export const PrivateRoute = (props: PrivateRouteProps) => {
 
   const { isLogin, userInfo: user } = useRecoilValue(userLoginState);
 
-  useEffect(() => {
-    if (isLogin === false) {
-      window.location.href = ROUTE_SIGN_IN;
-    }
-  }, [isLogin]);
+  // useEffect(() => {
+  //   if (isLogin === false) {
+  //     window.location.href = ROUTE_SIGN_IN;
+  //   }
+  // }, [isLogin]);
 
-  if (isLogin === undefined || user === undefined) {
-    return <div />;
-  }
+  // if (isLogin === undefined || user === undefined) {
+  //   return <div />;
+  // }
 
   return (
     <Route

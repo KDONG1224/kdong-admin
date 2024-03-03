@@ -3,7 +3,6 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
 import { cookieStorage, COOKIE_ACCESS_TOKEN } from './cookie';
 import { ROUTE_SIGN_IN } from 'routes/const';
-import qs from 'qs';
 
 const source = axios.CancelToken.source();
 

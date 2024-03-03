@@ -31,6 +31,7 @@ const StyledApp = styled.div`
 const App = () => {
   const loading = useRecoilValue(loadingState);
 
+  const b = useRecoilValue(loadingState);
   message.config({
     top: 50,
     duration: 2,

@@ -37,6 +37,7 @@ import { useSetRecoilState } from 'recoil';
 import { Color } from 'antd/es/color-picker';
 import { ColorPicker, Input, Select, message } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { dummyColors } from 'consts';
 
 export const ArticleDetail = () => {
   const [isRead, setIsRead] = useState(false);
@@ -73,49 +74,49 @@ export const ArticleDetail = () => {
     return new UploadApi();
   }, []);
 
-  const { data: resultLists, isFetching } = useQuery(
-    [QUERY_GET_ARTICLE_BY_ID, isEdit],
-    async () => {
-      if (!locationState || !isEdit) return null;
+  // const { data: resultLists, isFetching } = useQuery(
+  //   [QUERY_GET_ARTICLE_BY_ID, isEdit],
+  //   async () => {
+  //     if (!locationState || !isEdit) return null;
 
-      return await articleApi.getArticleById(locationState.articleId as string);
-    },
-    {
-      select: (data) => {
-        if (!data) return;
+  //     return await articleApi.getArticleById(locationState.articleId as string);
+  //   },
+  //   {
+  //     select: (data) => {
+  //       if (!data) return;
 
-        return data.result;
-      },
-      refetchOnWindowFocus: false,
-      retry: false
-    }
-  );
+  //       return data.result;
+  //     },
+  //     refetchOnWindowFocus: false,
+  //     retry: false
+  //   }
+  // );
 
-  const { data: categories } = useQuery<
-    ResponseSubCategoryLists,
-    AxiosError,
-    CategoryListsProps[]
-  >(
-    [QUERY_GET_SUB_CATEGORY],
-    async () => {
-      return await categoryApi.getAllSubCategories();
-    },
-    {
-      select: (data) => {
-        return data.result.subCategories as CategoryListsProps[];
-      },
-      onSuccess: (data) => {
-        if (!data || !resultLists || !resultLists.currentPost) return;
+  // const { data: categories } = useQuery<
+  //   ResponseSubCategoryLists,
+  //   AxiosError,
+  //   CategoryListsProps[]
+  // >(
+  //   [QUERY_GET_SUB_CATEGORY],
+  //   async () => {
+  //     return await categoryApi.getAllSubCategories();
+  //   },
+  //   {
+  //     select: (data) => {
+  //       return data.result.subCategories as CategoryListsProps[];
+  //     },
+  //     onSuccess: (data) => {
+  //       if (!data || !resultLists || !resultLists.currentPost) return;
 
-        const category = data.find(
-          (r) => r.id === resultLists.currentPost.category.id
-        );
+  //       const category = data.find(
+  //         (r) => r.id === resultLists.currentPost.category.id
+  //       );
 
-        setCategory(category || null);
-      },
-      refetchOnWindowFocus: false
-    }
-  );
+  //       setCategory(category || null);
+  //     },
+  //     refetchOnWindowFocus: false
+  //   }
+  // );
 
   const { mutateAsync, isLoading } = useMutation(
     async (data: any) => {
@@ -159,46 +160,46 @@ export const ArticleDetail = () => {
     }
   );
 
-  const onInitValues = useCallback(async () => {
-    try {
-      if (!resultLists) return;
+  // const onInitValues = useCallback(async () => {
+  //   try {
+  //     if (!resultLists) return;
 
-      const { title, content, tags, thumbnails, mainColor, subColor } =
-        resultLists.currentPost;
+  //     const { title, content, tags, thumbnails, mainColor, subColor } =
+  //       resultLists.currentPost;
 
-      const thumbIds = thumbnails.map((item: any) => item.id);
-      const tagIds = tags.map((item: any) => item.id);
-      const tagsArr = tags.length > 0 ? tags.map((tag: any) => tag.name) : [];
+  //     const thumbIds = thumbnails.map((item: any) => item.id);
+  //     const tagIds = tags.map((item: any) => item.id);
+  //     const tagsArr = tags.length > 0 ? tags.map((tag: any) => tag.name) : [];
 
-      const thumbnaileObjects = await Promise.all(
-        thumbnails.map(async (item: ArticleThumbnaiProps) => {
-          const file = await uploadApi.getS3Object(
-            item.location,
-            item.originalname,
-            item.mimetype
-          );
+  //     // const thumbnaileObjects = await Promise.all(
+  //     //   thumbnails.map(async (item: ArticleThumbnaiProps) => {
+  //     //     const file = await uploadApi.getS3Object(
+  //     //       item.location,
+  //     //       item.originalname,
+  //     //       item.mimetype
+  //     //     );
 
-          return {
-            file,
-            ...item
-          };
-        })
-      );
+  //     //     return {
+  //     //       file,
+  //     //       ...item
+  //     //     };
+  //     //   })
+  //     // );
 
-      setThumbnailLists(thumbnaileObjects);
-      setHasThumbIds(thumbIds);
+  //     // setThumbnailLists(thumbnaileObjects);
+  //     setHasThumbIds(thumbIds);
 
-      setTitle(title);
-      setEditorData(content);
-      setTags(tagsArr);
-      setMainColor(mainColor);
-      setSubColor(subColor);
+  //     setTitle(title);
+  //     setEditorData(content);
+  //     setTags(tagsArr);
+  //     setMainColor(mainColor);
+  //     setSubColor(subColor);
 
-      setHasTagIds(tagIds);
-    } catch (error) {
-      console.log(error);
-    }
-  }, [resultLists, uploadApi]);
+  //     setHasTagIds(tagIds);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }, [resultLists, uploadApi]);
 
   const onChangeTitle = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTitle(e.target.value);
@@ -278,9 +279,10 @@ export const ArticleDetail = () => {
         });
       }
 
-      if (category) {
-        formData.append('category', category.id);
-      }
+      // if (category) {
+      //   // formData.append('category', category.id);
+      // }
+      formData.append('category', '4e4a9884-29d3-41fe-81c4-f056a4d8f0b0');
 
       if (isEdit) {
         formData.append('hasThumbIds', hasThumbIds.join(',') as any);
@@ -315,6 +317,12 @@ export const ArticleDetail = () => {
         setModalTitle('썸네일 추가');
       }
     } else {
+      const randomIndex = Math.floor(Math.random() * dummyColors.length);
+      const randomColor = dummyColors[randomIndex];
+
+      setMainColor(randomColor.main);
+      setSubColor(randomColor.sub);
+
       if (thumbnailLists.length > 0) {
         setModalTitle('썸네일 보기');
       } else {
@@ -327,9 +335,9 @@ export const ArticleDetail = () => {
     setLoading(isLoading);
   }, [isLoading, setLoading]);
 
-  useEffect(() => {
-    onInitValues();
-  }, [onInitValues]);
+  // useEffect(() => {
+  //   onInitValues();
+  // }, [onInitValues]);
 
   return (
     <>
@@ -337,7 +345,7 @@ export const ArticleDetail = () => {
         <div className="detail-wrapper">
           <div className="detail-wrapper-default">
             <div className="detail-wrapper-default-category">
-              <Select
+              {/* <Select
                 placeholder="카테고리를 선택해주세요."
                 value={category?.categoryName}
                 options={
@@ -352,7 +360,7 @@ export const ArticleDetail = () => {
                 onChange={(_, option) =>
                   onChangeCategory(option as CategoryListsProps)
                 }
-              />
+              /> */}
               <ColorPicker
                 value={mainColor}
                 panelRender={(panel) => (
@@ -428,7 +436,7 @@ export const ArticleDetail = () => {
         open={isThumbModal}
         onCancel={onVisibleThumbModal}
         okText={`${thumbnailLists ? '썸네일 변경' : '썸네일 추가'}`}
-        isLoading={isFetching}
+        // isLoading={isFetching}
         isEdit={isEdit}
         onChangeUploadFile={onChangeUploadFile}
         onRemoveUploadFile={onRemoveUploadFile}
